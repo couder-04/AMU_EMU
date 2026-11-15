@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IITPSx</title>
+<style>/* IITPSx - styles (CS2102 mini project, Parth Tomar 2501CS09) */
+:root {
+  --bg: #11131a; --panel: #1a1d27; --panel2: #222636; --line: #2e3347;
+  --text: #e6e8f0; --muted: #8b91a8; --accent: #7c8cff; --accent2: #a78bfa;
+  --green: #3ecf8e; --red: #ff6b6b; --yellow: #ffc857; --blue: #5ab0ff;
+  --code-bg: #0f1118; --shadow: 0 6px 20px rgba(0,0,0,.35); --fs: 13px; --lh: 20px;
+}
+[data-theme="light"] {
+  --bg: #eef0f7; --panel: #ffffff; --panel2: #f3f4fa; --line: #d9dcec;
+  --text: #1c2033; --muted: #6a7090; --accent: #4f5df0; --accent2: #7c5cf0;
+  --green: #12a56b; --red: #e23c3c; --yellow: #c78a00; --blue: #1b7fd6;
+  --code-bg: #fbfbff; --shadow: 0 4px 14px rgba(40,50,100,.12);
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg); color: var(--text); display: flex; flex-direction: column;
+  font: 14px/1.4 "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+button, select, input { font: inherit; color: inherit; }
+
+/* ---------- header ---------- */
+header {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+  padding: 10px 16px; background: var(--panel); border-bottom: 1px solid var(--line);
+}
+.brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+.logo {
+  width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff;
+  font-weight: 800; font-size: 15px; letter-spacing: .5px; box-shadow: var(--shadow);
+}
+.brand h1 { margin: 0; font-size: 18px; }
+.brand small { color: var(--muted); font-size: 12px; }
+.group { display: flex; gap: 6px; align-items: center; }
+button, select {
+  background: var(--panel2); border: 1px solid var(--line); border-radius: 8px;
+  padding: 7px 12px; cursor: pointer; transition: .12s;
+}
+button:hover:not(:disabled), select:hover { border-color: var(--accent); }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.success { background: var(--green); border-color: var(--green); color: #07261a; font-weight: 600; }
+button.danger  { background: var(--red); border-color: var(--red); color: #fff; font-weight: 600; }
+button.icon { padding: 7px 10px; }
+
+/* ---------- main layout ---------- */
+main {
+  flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(380px, 1fr) minmax(420px, 1fr);
+  gap: 12px; padding: 12px;
+}
+.panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  display: flex; flex-direction: column; min-height: 0; box-shadow: var(--shadow); overflow: hidden;
+}
+.panel-title {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 14px; font-weight: 600; border-bottom: 1px solid var(--line); background: var(--panel2);
+}
+.panel-title span.hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+.right { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+/* ---------- editor ---------- */
+.editor-wrap { flex: 1; display: flex; min-height: 0; background: var(--code-bg); }
+#gutter {
+  width: 52px; overflow: hidden; background: var(--panel2); color: var(--muted); text-align: right;
+  padding: 10px 8px 10px 0; font: var(--fs) / var(--lh) Consolas, Menlo, "Courier New", monospace; cursor: pointer;
+  border-right: 1px solid var(--line); user-select: none;
+}
+#gutter div { height: var(--lh); padding-right: 4px; border-right: 3px solid transparent; white-space: pre; }
+#gutter div.err  { color: var(--red);    border-right-color: var(--red); font-weight: 700; }
+#gutter div.warn { color: var(--yellow); border-right-color: var(--yellow); }
+#gutter div.cur  { color: var(--green);  border-right-color: var(--green); background: rgba(62,207,142,.12); font-weight: 700; }
+#code {
+  flex: 1; border: 0; outline: 0; resize: none; background: transparent; color: var(--text);
+  padding: 10px 12px; font: var(--fs) / var(--lh) Consolas, Menlo, "Courier New", monospace;
+  white-space: pre; overflow: auto; tab-size: 4;
+}
+
+/* ---------- registers ---------- */
+.regs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.reg {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px;
+  box-shadow: var(--shadow); transition: background .3s, border-color .3s;
+}
+.reg .name { color: var(--muted); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+.reg .dec { font: 700 20px Consolas, Menlo, monospace; }
+.reg .hex { font: 12px Consolas, Menlo, monospace; color: var(--accent); }
+.reg.changed { background: rgba(124,140,255,.22); border-color: var(--accent); }
+
+/* ---------- tabs ---------- */
+.tabs { flex: 1; }
+.tabbar { display: flex; background: var(--panel2); border-bottom: 1px solid var(--line); }
+.tabbar button {
+  border: 0; border-radius: 0; background: transparent; padding: 9px 16px; color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+.tabbar button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+.pane { flex: 1; min-height: 0; overflow: auto; display: none; padding: 0; }
+.pane.active { display: block; }
+.pane.pad { padding: 12px 16px; }
+
+table { border-collapse: collapse; width: 100%; font: 13px Consolas, Menlo, "Courier New", monospace; }
+th { text-align: left; color: var(--muted); font-weight: 600; padding: 6px 10px; position: sticky; top: 0; background: var(--panel2); }
+td { padding: 3px 10px; border-top: 1px solid var(--line); white-space: pre; }
+tr.label td { color: var(--accent2); font-weight: 600; background: rgba(167,139,250,.07); }
+tr.set td { color: var(--yellow); }
+tr.pc td { background: rgba(62,207,142,.18); }
+tr.pc td:first-child::before { content: "\25B6 "; color: var(--green); }
+tr.wr td { background: rgba(255,200,87,.2); }
+tr.sp td:last-child::after { content: "  \2190 SP"; color: var(--blue); font-weight: 700; }
+tr.click { cursor: pointer; }
+tr.click:hover td { background: rgba(124,140,255,.12); }
+.sym { padding: 10px 14px; border-top: 1px solid var(--line); }
+.sym.values {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px; border-top: 1px solid var(--line);
+}
+.sym b { color: var(--muted); font-weight: 600; margin-right: 10px; }
+.chip {
+  display: inline-block; margin: 2px 6px 2px 0; padding: 1px 9px; border-radius: 99px;
+  background: var(--panel2); border: 1px solid var(--line); font: 12px Consolas, Menlo, monospace;
+}
+.memctl { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+.memctl input { width: 90px; background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; font-family: Consolas, Menlo, monospace; }
+
+/* ---------- console ---------- */
+#console { font: 13px/1.5 Consolas, Menlo, "Courier New", monospace; padding: 8px 12px; }
+#console div { padding: 1px 4px; border-radius: 4px; white-space: pre-wrap; }
+#console .err { color: var(--red); }
+#console .warn { color: var(--yellow); }
+#console .ok { color: var(--green); }
+#console .info { color: var(--muted); }
+#console .line { cursor: pointer; }
+#console .line:hover { background: rgba(124,140,255,.15); }
+.helptable td:first-child { color: var(--accent2); font-weight: 600; }
+.helpnote { color: var(--muted); font-size: 12.5px; margin-top: 10px; }
+kbd { background: var(--panel2); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 5px; padding: 0 6px; font-size: 12px; }
+
+/* ---------- status bar ---------- */
+footer {
+  display: flex; gap: 18px; align-items: center; padding: 6px 16px; background: var(--panel);
+  border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px;
+}
+footer .badge { padding: 1px 10px; border-radius: 99px; font-weight: 700; background: var(--panel2); color: var(--text); }
+footer .badge.ready { color: var(--blue); } footer .badge.running { color: var(--yellow); }
+footer .badge.halt { color: var(--green); } footer .badge.error { color: var(--red); }
+footer .spacer { margin-left: auto; }
+.drop { outline: 3px dashed var(--accent); outline-offset: -8px; }
+
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; overflow: auto; }
+  .editor { min-height: 320px; }
+  .right { min-height: 520px; }
+}
+
+/* ---------- extra features ---------- */
+#gutter div.bp { background: radial-gradient(circle at 9px 50%, var(--red) 5px, transparent 6px); }
+#gutter div.cur.bp { background: radial-gradient(circle at 9px 50%, var(--red) 5px, rgba(62,207,142,.12) 6px); }
+button.mini { padding: 1px 8px; font-size: 12px; border-radius: 6px; }
+.tabbar { overflow-x: auto; }
+.tabbar button { white-space: nowrap; padding: 9px 13px; }
+.filetext { margin: 0; padding: 10px 14px; font: 13px/1.5 Consolas, Menlo, "Courier New", monospace; white-space: pre; overflow: auto; }
+button.segon { background: var(--accent); border-color: var(--accent); color: #fff; }
+.bits .op  { color: var(--accent); } .bits .opc { color: var(--green); font-weight: 700; }
+.bits { letter-spacing: .5px; }
+.bar { display: inline-block; height: 12px; border-radius: 3px; background: linear-gradient(90deg, var(--accent), var(--accent2)); vertical-align: middle; }
+.kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-bottom: 14px; }
+.kv div { background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; }
+.kv b { display: block; font: 700 18px Consolas, Menlo, monospace; } .kv span { color: var(--muted); font-size: 12px; }
+h3.sec { margin: 14px 0 6px; font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+.chip.w { cursor: pointer; } .chip.w:hover { border-color: var(--red); }
+
+/* ---------- terminal dock ---------- */
+.dock { margin: 0 12px 10px; height: 230px; flex: none; }
+.dock.hidden { display: none; }
+.dock.big { height: 46vh; }
+#termOut {
+  flex: 1; overflow: auto; padding: 8px 12px; background: var(--code-bg); color: var(--text);
+  font: 13px/1.45 Consolas, Menlo, "Courier New", monospace;
+}
+#termOut div { white-space: pre-wrap; word-break: break-all; }
+#termOut .cmd { color: var(--green); } #termOut .err { color: var(--red); } #termOut .warn { color: var(--yellow); }
+#termOut .ok { color: var(--green); } #termOut .info { color: var(--muted); } #termOut .hl { color: var(--blue); }
+.prompt { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--code-bg); border-top: 1px solid var(--line); }
+.prompt .ps { color: var(--green); font: 700 13px Consolas, Menlo, monospace; }
+.prompt input { flex: 1; background: transparent; border: 0; outline: 0; color: var(--text); font: 13px Consolas, Menlo, "Courier New", monospace; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">ISA</div>
+    <div><h1>IITPSx</h1><small>Assembler + Emulator &bull; CS2102 Mini Project &bull; Parth Tomar (2501CS09)</small></div>
+  </div>
+  <div class="group">
+    <button id="btnOpen" title="Open an .asm file">&#128194; Open</button>
+    <button id="btnSave" title="Save the source as .asm">&#128190; Save</button>
+    <select id="examples" title="Load an example program"><option value="">Examples&hellip;</option></select>
+  </div>
+  <div class="group">
+    <button id="btnAssemble" class="primary" title="Ctrl+Enter">&#9881; Assemble</button>
+    <button id="btnRun" class="success" title="F5">&#9654; Run</button>
+    <button id="btnStep" title="F10">&#9197; Step</button>
+    <button id="btnBack" title="Undo the last step (Shift+F10)">&#9198; Back</button>
+    <button id="btnReset">&#8634; Reset</button>
+    <select id="speed" title="Run speed"><option value="0">Fast</option><option value="250">Slow</option></select>
+    <label class="group" style="gap:4px;color:var(--muted)"><input type="checkbox" id="trace"> Trace</label>
+    <button id="btnTerm" class="icon" title="Show / hide terminal (Ctrl+`)">&#9000; Terminal</button>
+    <button id="btnTheme" class="icon" title="Dark / light">&#127769;</button>
+  </div>
+  <input type="file" id="fileInput" accept=".asm,.txt,text/plain" hidden>
+</header>
+
+<main>
+  <section class="panel editor">
+    <div class="panel-title">Source code
+      <span class="hint"><button class="mini" id="fontDown" title="Smaller text">A&minus;</button>
+      <button class="mini" id="fontUp" title="Bigger text">A+</button>
+      &nbsp;<span id="cursorPos">Ln 1, Col 1</span></span></div>
+    <div class="editor-wrap">
+      <div id="gutter"></div>
+      <textarea id="code" spellcheck="false" wrap="off"></textarea>
+    </div>
+  </section>
+
+  <section class="right">
+    <div class="regs">
+      <div class="reg" id="regA"><div class="name">A</div><div class="dec">0</div><div class="hex">0x00000000</div></div>
+      <div class="reg" id="regB"><div class="name">B</div><div class="dec">0</div><div class="hex">0x00000000</div></div>
+      <div class="reg" id="regPC"><div class="name">PC</div><div class="dec">0</div><div class="hex">0x00000000</div></div>
+      <div class="reg" id="regSP"><div class="name">SP</div><div class="dec">0</div><div class="hex">0x00000000</div></div>
+    </div>
+    <div id="values" class="sym values" style="display:none"></div>
+    <div class="panel tabs">
+      <div class="tabbar">
+        <button data-tab="listing" class="active">Listing</button>
+        <button data-tab="lst">.lst</button>
+        <button data-tab="obj">.o</button>
+        <button data-tab="memory">Memory</button>
+        <button data-tab="stats">Stats</button>
+        <button data-tab="console">Console</button>
+        <button data-tab="help">Help</button>
+      </div>
+      <div class="pane active" id="pane-listing">
+        <table><thead><tr><th>Addr</th><th>Machine code</th><th>Instruction</th><th>Hits</th></tr></thead><tbody id="listBody"></tbody></table>
+        <div class="sym" id="symbols"></div>
+        <div class="sym" id="dlButtons" style="display:none">
+          <button id="btnDlObj">&#11015; Download .o</button>
+          <button id="btnDlLst">&#11015; Download .lst</button>
+        </div>
+      </div>
+      <div class="pane" id="pane-lst">
+        <div class="memctl">
+          <span id="lstInfo" style="color:var(--muted)">not assembled</span>
+          <button id="lstCopy">Copy</button><button id="lstDl">&#11015; Download .lst</button><button id="lstTerm">Print in terminal</button>
+        </div>
+        <pre id="lstText" class="filetext">Assemble a program to see the listing file here.</pre>
+      </div>
+      <div class="pane" id="pane-obj">
+        <div class="memctl">
+          <span id="objInfo" style="color:var(--muted)">not assembled</span>
+          <button id="objHexBtn" class="segon">Hex dump</button><button id="objWordBtn">Words &amp; bit fields</button>
+          <button id="objCopy">Copy hex</button><button id="objDl">&#11015; Download .o</button>
+        </div>
+        <pre id="objHex" class="filetext">Assemble a program to see the object file here.</pre>
+        <div id="objWords" style="display:none"></div>
+      </div>
+      <div class="pane" id="pane-memory">
+        <div class="memctl">
+          <span style="color:var(--muted)">Start (hex)</span>
+          <input id="memStart" value="0">
+          <button id="memGo">Go</button><button id="memPrev">&laquo; Prev</button><button id="memNext">Next &raquo;</button>
+          <button id="memPC">PC</button><button id="memSP">SP</button>
+          <span style="margin-left:10px;color:var(--muted)">Watch</span>
+          <input id="watchIn" placeholder="label or hex addr" style="width:130px"><button id="watchAdd">Add</button>
+        </div>
+        <div id="watchBar" class="sym" style="padding:6px 10px;display:none"></div>
+        <table><thead><tr><th>Addr</th><th>Hex</th><th>Decimal</th><th>As instruction</th></tr></thead><tbody id="memBody"></tbody></table>
+      </div>
+      <div class="pane pad" id="pane-stats"></div>
+      <div class="pane" id="pane-console"><div id="console"></div></div>
+      <div class="pane pad" id="pane-help"></div>
+    </div>
+  </section>
+</main>
+
+<section class="panel dock" id="dock">
+  <div class="panel-title">
+    <span>&#9000; Terminal <span class="hint">&nbsp;type <b>help</b> for commands</span></span>
+    <span class="hint">
+      <label><input type="checkbox" id="autoLst" checked> print .lst after assemble</label>
+      <button class="mini" id="termBig" title="Taller / shorter">&#8597;</button>
+      <button class="mini" id="termClear">Clear</button>
+      <button class="mini" id="termHide">&#10005;</button>
+    </span>
+  </div>
+  <div id="termOut"></div>
+  <div class="prompt"><span class="ps" id="ps">$</span><input id="termIn" spellcheck="false" autocomplete="off" placeholder="asm | run | cat name.lst | xxd name.o | help"></div>
+</section>
+
+<footer>
+  <span class="badge ready" id="state">NOT ASSEMBLED</span>
+  <span id="statusMsg">Write some code and press Assemble.</span>
+  <span class="spacer" id="stepCount">0 steps</span>
+</footer>
+
+<script>/*
+ * core.js - IITPSx assembler + emulator in JavaScript (used by IITPSx)
+ * Author: Parth Tomar (2501CS09), IIT Patna - CS2102 mini project
+ *
+ * This is a port of asm.cpp and emu.cpp so the same logic can run inside the GUI.
+ * Everything is exposed as window.IITPSx (browser) or module.exports (node, for testing).
+ */
+(function (root) {
+  'use strict';
+
+  /*
+   * One instruction table drives the assembler, the disassembler, the Help tab
+   * and the terminal "isa" command. Columns: name, opcode, operand kind, description.
+   * Opcode -1 is a pseudo-op (data, SET) and is not a machine instruction.
+   */
+  var TABLE = [
+    ['data', -1, 'data', 'reserve a word holding v'],
+    ['ldc', 0, 'value', 'B := A; A := v'],
+    ['adc', 1, 'value', 'A := A + v'],
+    ['ldl', 2, 'value', 'B := A; A := mem[SP + v]'],
+    ['stl', 3, 'value', 'mem[SP + v] := A; A := B'],
+    ['ldnl', 4, 'value', 'A := mem[A + v]'],
+    ['stnl', 5, 'value', 'mem[A + v] := B'],
+    ['add', 6, 'none', 'A := B + A'],
+    ['sub', 7, 'none', 'A := B - A'],
+    ['shl', 8, 'none', 'A := B << A'],
+    ['shr', 9, 'none', 'A := B >> A'],
+    ['adj', 10, 'value', 'SP := SP + v'],
+    ['a2sp', 11, 'none', 'SP := A; A := B'],
+    ['sp2a', 12, 'none', 'B := A; A := SP'],
+    ['call', 13, 'offset', 'B := A; A := PC; PC := PC + o'],
+    ['return', 14, 'none', 'PC := A; A := B'],
+    ['brz', 15, 'offset', 'if A == 0 then PC := PC + o'],
+    ['brlz', 16, 'offset', 'if A < 0 then PC := PC + o'],
+    ['br', 17, 'offset', 'PC := PC + o'],
+    ['halt', 18, 'none', 'stop the emulator'],
+    ['mul', 19, 'none', 'A := B * A'],
+    ['div', 20, 'none', 'if A == 0 then error, else A := B / A'],
+    ['set', -1, 'set', 'label := v (no word emitted)']
+  ];
+  var INSTR = Object.create(null);
+  var NAMES = [];
+  var HAS_OPERAND = [];
+  var ISA = [];
+  TABLE.forEach(function (t) {
+    var rec = { name: t[0], opcode: t[1], kind: t[2], doc: t[3] };
+    INSTR[t[0]] = rec;
+    ISA.push(rec);
+    if (t[1] >= 0) {
+      NAMES[t[1]] = t[0] === 'halt' ? 'HALT' : t[0];
+      HAS_OPERAND[t[1]] = t[2] === 'none' ? 0 : 1;
+    }
+  });
+  var MEM_WORDS = 65536;
+  var OPERAND_MIN = -8388608, OPERAND_MAX = 16777215;
+
+  function isValidLabel(s) { return /^[A-Za-z][A-Za-z0-9]*$/.test(s); }
+
+  /* decimal, 0x hex or 0 octal with optional sign (like strtol base 0); null if invalid */
+  function parseNumber(tok) {
+    var m = /^([+-]?)(0[xX][0-9a-fA-F]+|0[0-7]*|[1-9][0-9]*)$/.exec(tok);
+    if (!m) return null;
+    var body = m[2], v;
+    if (/^0[xX]/.test(body)) v = parseInt(body.slice(2), 16);
+    else if (body.length > 1 && body[0] === '0') v = parseInt(body, 8);
+    else v = parseInt(body, 10);
+    return m[1] === '-' ? -v : v;
+  }
+
+  function hex8(n) {
+    var s = (n >>> 0).toString(16).toUpperCase();
+    while (s.length < 8) s = '0' + s;
+    return s;
+  }
+
+  /* ======================= ASSEMBLER ======================= */
+
+  function report(st, passNo, lineNo, pass2Only, msg) {
+    /* syntax errors are reported once (pass 1); unresolved labels in pass 2 */
+    if ((pass2Only && passNo === 2) || (!pass2Only && passNo === 1)) {
+      st.errors.push({ line: lineNo, msg: msg });
+    }
+  }
+
+  function labelAtAddress(st, addr) {
+    for (var i = 0; i < st.labels.length; i++) {
+      if (!st.labels[i].isSet && st.labels[i].value === addr) return st.labels[i];
+    }
+    return null;
+  }
+
+  /* turn an operand token into a number; returns {ok, value, shown} */
+  function evalOperand(st, passNo, lineNo, def, tok) {
+    var value = 0, shown = tok;
+    var numeric = /^[0-9+\-]/.test(tok);
+    if (numeric) {
+      var v = parseNumber(tok);
+      if (v === null) {
+        report(st, passNo, lineNo, false, "invalid number '" + tok + "'");
+        return { ok: false, value: 0, shown: tok };
+      }
+      value = v; shown = String(v);
+    } else if (isValidLabel(tok)) {
+      if (def.kind === 'set') {
+        report(st, passNo, lineNo, false, 'SET needs a numeric value, not a label');
+        return { ok: false, value: 0, shown: tok };
+      }
+      if (passNo === 1) return { ok: true, value: 0, shown: tok };
+      var idx = st.labelIndex[tok];
+      if (idx === undefined) {
+        report(st, passNo, lineNo, true, "no such label '" + tok + "'");
+        return { ok: false, value: 0, shown: tok };
+      }
+      st.labels[idx].used = true;
+      value = st.labels[idx].value;
+      if (def.kind === 'offset') value = value - (st.pc + 1);
+      shown = tok;
+    } else {
+      report(st, passNo, lineNo, false, "invalid operand '" + tok + "'");
+      return { ok: false, value: 0, shown: tok };
+    }
+    var lo = OPERAND_MIN, hi = OPERAND_MAX;
+    if (def.kind === 'data' || def.kind === 'set') { lo = -2147483648; hi = 4294967295; }
+    if (value < lo || value > hi) {
+      report(st, passNo, lineNo, passNo === 2 && !numeric, 'operand out of range: ' + value);
+      return { ok: false, value: 0, shown: shown };
+    }
+    return { ok: true, value: value, shown: shown };
+  }
+
+  function processLine(st, passNo, lineNo, raw) {
+    var text = raw;
+    var sc = text.indexOf(';');
+    if (sc >= 0) text = text.slice(0, sc);          /* strip comment */
+    text = text.trim();
+    if (text === '') return;
+
+    var labelName = '', haveLabel = false, labelOk = false;
+    var colon = text.indexOf(':');
+    if (colon >= 0) {
+      labelName = text.slice(0, colon).trim();
+      text = text.slice(colon + 1).trim();
+      haveLabel = true;
+      labelOk = isValidLabel(labelName);
+      if (!labelOk) report(st, passNo, lineNo, false, "bogus label name '" + labelName + "'");
+    }
+
+    var tok = text === '' ? [] : text.split(/\s+/);
+    var labelValue = st.pc, labelIsSet = false, emit = false, word = 0;
+    var mnemonic = '', operandShown = '';
+
+    if (tok.length > 0) {
+      var def = INSTR[tok[0].toLowerCase()];
+      if (!def) {
+        report(st, passNo, lineNo, false, "unknown mnemonic '" + tok[0] + "'");
+      } else {
+        var nargs = tok.length - 1, ok = true, value = 0, shown = '';
+        mnemonic = def.name;
+        if (nargs > 1) {
+          report(st, passNo, lineNo, false, 'extra text at end of line');
+          ok = false;
+        } else if (def.kind === 'none') {
+          if (nargs === 1) {
+            report(st, passNo, lineNo, false, "unexpected operand for '" + def.name + "'");
+            ok = false;
+          }
+        } else if (nargs === 0) {
+          report(st, passNo, lineNo, false, "missing operand for '" + def.name + "'");
+          ok = false;
+        } else {
+          var r = evalOperand(st, passNo, lineNo, def, tok[1]);
+          ok = r.ok; value = r.value; shown = r.shown;
+        }
+
+        if (def.kind === 'set') {
+          if (!haveLabel) report(st, passNo, lineNo, false, 'SET requires a label on the same line');
+          if (ok) labelValue = value;
+          labelIsSet = true;
+          if (passNo === 2) {
+            st.listing.push({ addr: 0, type: 2, word: 0, line: lineNo,
+              text: labelName + ': SET ' + (ok ? shown : (tok.length > 1 ? tok[1] : '?')) });
+          }
+        } else {
+          emit = true;
+          if (def.kind === 'data') {
+            word = value >>> 0;
+          } else {
+            word = (((value & 0xFFFFFF) << 8) | def.opcode) >>> 0;
+            if (def.opcode === 18) st.sawHalt = true;
+          }
+          if (def.kind === 'offset' && ok && passNo === 2) {
+            var t = labelAtAddress(st, st.pc + 1 + value);
+            shown = t ? t.name : String(value);
+          }
+          operandShown = ok ? shown : '';
+        }
+      }
+    }
+
+    /* define the label (pass 1) / list it (pass 2) */
+    if (haveLabel && labelOk) {
+      if (passNo === 1) {
+        if (st.labelIndex[labelName] !== undefined) {
+          report(st, passNo, lineNo, false, "duplicate label '" + labelName + "'");
+        } else {
+          st.labelIndex[labelName] = st.labels.length;
+          st.labels.push({ name: labelName, value: labelValue, isSet: labelIsSet, used: false, line: lineNo });
+        }
+      } else if (!labelIsSet) {
+        st.listing.push({ addr: st.pc, type: 0, word: 0, line: lineNo, text: labelName + ':' });
+      }
+    }
+
+    if (emit) {
+      if (passNo === 2) {
+        st.words.push(word);
+        st.listing.push({ addr: st.pc, type: 1, word: word, line: lineNo,
+          text: mnemonic + (operandShown === '' ? '' : ' ' + operandShown) });
+      }
+      st.pc++;
+    }
+  }
+
+  function assemble(source) {
+    var lines = source.split(/\r?\n/);
+    var st = { errors: [], warnings: [], labels: [], labelIndex: Object.create(null),
+      words: [], listing: [], pc: 0, sawHalt: false };
+    for (var passNo = 1; passNo <= 2; passNo++) {
+      st.pc = 0;
+      if (passNo === 2) { st.words = []; st.listing = []; }
+      for (var i = 0; i < lines.length; i++) processLine(st, passNo, i + 1, lines[i]);
+    }
+    st.labels.forEach(function (l) {
+      if (!l.used) st.warnings.push({ line: l.line, msg: "label '" + l.name + "' defined but never used" });
+    });
+    if (st.errors.length === 0 && !st.sawHalt) {
+      st.warnings.push({ line: 0, msg: 'program contains no HALT instruction' });
+    }
+    return { ok: st.errors.length === 0, errors: st.errors, warnings: st.warnings,
+      words: st.words, listing: st.listing, labels: st.labels };
+  }
+
+  /* listing text in the same layout as the C++ assembler's .lst file */
+  function listingText(listing) {
+    return listing.map(function (e) {
+      if (e.type === 0) return hex8(e.addr) + ' ' + e.text;
+      if (e.type === 1) return hex8(e.addr) + ' ' + hex8(e.word) + ' ' + e.text;
+      return '         ' + e.text;
+    }).join('\n') + '\n';
+  }
+
+  /* object file: little-endian 32-bit words */
+  function objectBytes(words) {
+    var out = new Uint8Array(words.length * 4);
+    for (var i = 0; i < words.length; i++) {
+      out[4 * i] = words[i] & 0xFF; out[4 * i + 1] = (words[i] >>> 8) & 0xFF;
+      out[4 * i + 2] = (words[i] >>> 16) & 0xFF; out[4 * i + 3] = (words[i] >>> 24) & 0xFF;
+    }
+    return out;
+  }
+
+  /* ======================= EMULATOR ======================= */
+
+  function Machine(words, memWords) {
+    this.memSize = memWords || MEM_WORDS;
+    this.image = words.slice();
+    this.maxSteps = 10000000;
+    this.recordHistory = false;     /* set true to allow stepBack() */
+    this.reset();
+  }
+
+  Machine.prototype.reset = function () {
+    this.mem = new Int32Array(this.memSize);
+    for (var i = 0; i < this.image.length; i++) this.mem[i] = this.image[i] | 0;
+    this.A = 0; this.B = 0; this.PC = 0; this.SP = this.memSize;
+    this.steps = 0; this.state = 'ready'; this.message = '';
+    this.lastWrite = -1;
+    this.history = [];                              /* undo information for stepBack() */
+    this.counts = new Int32Array(NAMES.length);     /* how often each opcode ran */
+    this.hits = new Int32Array(this.memSize);       /* how often each address was executed */
+    this.minSP = this.memSize;                      /* lowest SP seen (stack depth) */
+    this.snap = null;
+  };
+
+  Machine.prototype.fail = function (msg) {
+    this.state = 'error'; this.message = msg; return 'error';
+  };
+
+  Machine.prototype.addrOk = function (a) { return a >= 0 && a < this.memSize; };
+
+  /* execute one instruction: returns 'ok', 'halt' or 'error' */
+  Machine.prototype.step = function () {
+    if (this.state === 'halt' || this.state === 'error') return this.state;
+    var snap = null;
+    if (this.recordHistory) {
+      snap = { A: this.A, B: this.B, PC: this.PC, SP: this.SP, steps: this.steps, state: this.state,
+        lw: this.lastWrite, addr: -1, old: 0, hitPC: -1, op: -1 };
+    }
+    this.snap = snap;
+    var res = this.exec();
+    if (snap) {
+      this.history.push(snap);
+      if (this.history.length > 20000) this.history.splice(0, 5000);
+    }
+    return res;
+  };
+
+  /* undo the last instruction (only works for steps taken with recordHistory = true) */
+  Machine.prototype.stepBack = function () {
+    if (!this.history.length) return false;
+    var s = this.history.pop();
+    if (s.addr >= 0) this.mem[s.addr] = s.old;
+    this.A = s.A; this.B = s.B; this.PC = s.PC; this.SP = s.SP;
+    this.steps = s.steps; this.state = s.state; this.message = ''; this.lastWrite = s.lw;
+    if (s.hitPC >= 0) { this.hits[s.hitPC]--; this.counts[s.op]--; }
+    return true;
+  };
+
+  Machine.prototype.exec = function () {
+    this.lastWrite = -1;
+    if (this.PC < 0 || this.PC >= this.memSize) return this.fail('PC out of range (errant program)');
+    var w = this.mem[this.PC] >>> 0;
+    var op = w & 0xFF;
+    var arg = (w & 0xFFFFFF00) >> 8;           /* sign-extended 24-bit operand */
+    if (op >= NAMES.length) return this.fail('unknown opcode ' + op + ' at PC=' + this.PC);
+    if (++this.steps > this.maxSteps) return this.fail('instruction limit exceeded (probable infinite loop)');
+    this.hits[this.PC]++; this.counts[op]++;
+    if (this.snap) { this.snap.hitPC = this.PC; this.snap.op = op; }
+    this.PC++;                                  /* PC is incremented before the action */
+    var ea;
+    this.state = 'running';
+    switch (op) {
+      case 0: this.B = this.A; this.A = arg; break;                              /* ldc  */
+      case 1: this.A = (this.A + arg) | 0; break;                                /* adc  */
+      case 2: ea = this.SP + arg;                                                /* ldl  */
+        if (!this.addrOk(ea)) return this.fail('ldl address out of range');
+        this.B = this.A; this.A = this.mem[ea]; break;
+      case 3: ea = this.SP + arg;                                                /* stl  */
+        if (!this.addrOk(ea)) return this.fail('stl address out of range');
+        if (this.snap) { this.snap.addr = ea; this.snap.old = this.mem[ea]; }
+        this.mem[ea] = this.A; this.lastWrite = ea; this.A = this.B; break;
+      case 4: ea = this.A + arg;                                                 /* ldnl */
+        if (!this.addrOk(ea)) return this.fail('ldnl address out of range');
+        this.A = this.mem[ea]; break;
+      case 5: ea = this.A + arg;                                                 /* stnl */
+        if (!this.addrOk(ea)) return this.fail('stnl address out of range');
+        if (this.snap) { this.snap.addr = ea; this.snap.old = this.mem[ea]; }
+        this.mem[ea] = this.B; this.lastWrite = ea; break;
+      case 6: this.A = (this.B + this.A) | 0; break;                             /* add  */
+      case 7: this.A = (this.B - this.A) | 0; break;                             /* sub  */
+      case 8: this.A = (this.A < 0 || this.A > 31) ? 0 : (this.B << this.A); break;            /* shl */
+      case 9: this.A = (this.A < 0 || this.A > 31) ? (this.B < 0 ? -1 : 0) : (this.B >> this.A); break; /* shr */
+      case 10: this.SP = (this.SP + arg) | 0; break;                             /* adj  */
+      case 11: this.SP = this.A; this.A = this.B; break;                         /* a2sp */
+      case 12: this.B = this.A; this.A = this.SP; break;                         /* sp2a */
+      case 13: this.B = this.A; this.A = this.PC; this.PC = this.PC + arg; break; /* call */
+      case 14: this.PC = this.A; this.A = this.B; break;                         /* return */
+      case 15: if (this.A === 0) this.PC = this.PC + arg; break;                 /* brz  */
+      case 16: if (this.A < 0) this.PC = this.PC + arg; break;                   /* brlz */
+      case 17: this.PC = this.PC + arg; break;                                   /* br   */
+      case 18: this.state = 'halt'; this.message = 'HALT reached'; return 'halt'; /* HALT */
+      case 19: this.A = Math.imul(this.B, this.A); break;                        /* mul  */
+      case 20:                                                                   /* div  */
+        if (this.A === 0) return this.fail('division by zero');
+        this.A = (this.A === -1) ? ((-this.B) | 0) : ((this.B / this.A) | 0);
+        break;
+    }
+    if (this.SP < this.minSP) this.minSP = this.SP;
+    return 'ok';
+  };
+
+  /* decode one memory word as text, e.g. "ldc 5" */
+  function disassemble(word) {
+    var w = word >>> 0, op = w & 0xFF, arg = (w & 0xFFFFFF00) >> 8;
+    if (op >= NAMES.length) return 'data 0x' + w.toString(16).toUpperCase();
+    return HAS_OPERAND[op] ? NAMES[op] + ' ' + arg : NAMES[op];
+  }
+
+  var api = {
+    assemble: assemble, listingText: listingText, objectBytes: objectBytes,
+    Machine: Machine, disassemble: disassemble, hex8: hex8,
+    NAMES: NAMES, HAS_OPERAND: HAS_OPERAND, ISA: ISA, MEM_WORDS: MEM_WORDS
+  };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else root.IITPSx = api;
+})(this);
+</script>
+<script>var EXAMPLES = [{"key": "test1", "title": "test1  \u2014  labels, signed numbers and branches", "code": "; test1.asm - labels, signed numbers and branches\nlabel:\t; an unused label\n\tldc 0\n\tldc -5\n\tldc +5\nloop: br loop ; an infinite loop\nbr next\t;offset should be zero\nnext:\n    \tldc loop ; load code address\n\tldc var1 ; forward ref\nvar1: data 0 ; a variable\nhalt\n"}, {"key": "test2", "title": "test2  \u2014  Test error handling", "code": "; test2.asm\n; Test error handling\nlabel:\nlabel: ; duplicate label definiton\nbr nonesuch ; no such label\nldc 08ge ; not a number\nldc ; missing operand\nadd 5 ; unexpected operand\nldc 5, 6; extra on end of line\n0def: ; bogus label name\nfibble; bogus mnemonic\n0def ; bogus mnemonic\n"}, {"key": "test3", "title": "test3  \u2014  Test SET", "code": "; test3.asm\n; Test SET\nval: SET 75\nldc     val\nadc     val2\nval2: SET 66\n"}, {"key": "test4", "title": "test4  \u2014  recursive triangle numbers", "code": "; test4.asm - recursive triangle numbers\n        ldc 0x1000\n        a2sp\n        adj -1\n        ldc result\n        stl 0\n        ldc count\n        ldnl 0\n        call main\n        adj 1\n        HALT\n;\nmain:   adj -3\n        stl 1\n        stl 2\n        ldc 0           ; zero accumulator\n        stl 0\nloop:   adj -1\n        ldl 3\n        stl 0\n        ldl 1\n        call triangle\n        adj 1\n        ldl 3\n        stnl 0\n        ldl 3\n        adc 1\n        stl 3\n        ldl 0\n        adc 1\n        stl 0\n        ldl 0           ; reload it\n        ldl 2\n        sub\n        brlz loop\n        ldl 1           ; get return address\n        adj 3\n        return\n;\ntriangle:adj -3\n        stl 1\n        stl 2\n        ldc 1\n        shl\n        ldl 3\n        sub\n        brlz skip\n        ldl 3\n        ldl 2\n        sub\n        stl 2\nskip:   ldl 2\n        brz one\n        ldl 3\n        adc -1\n        stl 0\n        adj -1\n        ldl 1\n        stl 0\n        ldl 3\n        adc -1\n        call triangle\n        ldl 1\n        stl 0\n        stl 1\n        ldl 3\n        call triangle\n        adj 1\n        ldl 0\n        add\n        ldl 1\n        adj 3\n        return\none:    ldc 1\n        ldl 1\n        adj 3\n        return\n;\ncount:  data 10\nresult: data 0\n"}, {"key": "test5", "title": "test5  \u2014  SET and stack locals (SP is not initialised)", "code": "; test5.asm - SET and stack locals (SP is not initialised)\ncount:  SET 10\nsum:    data 0\n\nstart:\nldc count\nstl 0\n\nldc 0\nstl 1\n\nloop:\nldl 0\nbrz done\n\nldl 1\nldl 0\nadd\nstl 1\n\nldl 0\nadc -1\nstl 0\n\nbr loop\n\ndone:\nldl 1\nldc sum\nstnl 0\n\nhalt"}, {"key": "test6", "title": "test6  \u2014  unused labels (assembler warnings)", "code": "; test6.asm - unused labels (assembler warnings)\nunused1:\nunused2:\n\nldc 5\nldc 10\nadd\n\nloop:\nbr loop\n\nafterLoop:\nldc 1\nldc 2\nsub\n\nneverUsedLabel:\nldc 3\nhalt"}, {"key": "test7", "title": "test7  \u2014  assembler error cases", "code": "; test7.asm - assembler error cases\n1badlabel:\nldc 5\n\nstart:\nldc\n\nadd 10\n\nfoo 5\n\nldc missing_label\n\n// Wrong Comment format\n\ndup:\nldc 1\n\ndup:\nldc 2\n\ndata hello\n\nSET 10\n\nvalue: SET abc\n\nhalt"}, {"key": "test8", "title": "test8  \u2014  mul and div.", "code": "; test8.asm - mul and div.\n; Expected: HALT with A = 21.\nldc 6\nldc 7\nmul ; A = 42\nldc 2\ndiv ; A = 21\nHALT\n"}, {"key": "test9", "title": "test9  \u2014  BUBBLE SORT (n = 8), sorts arr in place, ascending.", "code": "; test9.asm - BUBBLE SORT (n = 8), sorts arr in place, ascending.\n; Edit the data words under 'arr' (and n if the length changes); after HALT the\n; sorted values are whatever is in memory for arr (GUI Data panel / memory dump).\n; Only A/B (2-deep stack) are available, so loop state lives in memory variables.\n; Variables: outer = remaining passes, inner = remaining comparisons in a pass,\n;            p = address of the current element, ta/tb = temporaries.\n\n        ldc n\n        ldnl 0\n        adc -1\n        ldc outer\n        stnl 0            ; outer = n - 1\n\nouterloop:\n        ldc outer\n        ldnl 0\n        brz done          ; no passes left\n        brlz done\n        ldc inner\n        stnl 0            ; inner = outer\n        ldc arr\n        ldc p\n        stnl 0            ; p = &arr[0]\n\ninnerloop:\n        ldc inner\n        ldnl 0\n        brz nextouter     ; pass finished\n        ldc p\n        ldnl 0\n        ldnl 0            ; A = arr[k]\n        ldc ta\n        stnl 0            ; ta = arr[k]\n        ldc p\n        ldnl 0\n        ldnl 1            ; A = arr[k+1]\n        ldc tb\n        stnl 0            ; tb = arr[k+1]\n        ldc tb\n        ldnl 0\n        ldc ta\n        ldnl 0\n        sub               ; A = tb - ta\n        brlz swap         ; ta > tb -> swap\n        br advance\n\nswap:   ldc tb\n        ldnl 0\n        ldc p\n        ldnl 0\n        stnl 0            ; arr[k]   = tb\n        ldc ta\n        ldnl 0\n        ldc p\n        ldnl 0\n        stnl 1            ; arr[k+1] = ta\n\nadvance:\n        ldc p\n        ldnl 0\n        adc 1\n        ldc p\n        stnl 0            ; p++\n        ldc inner\n        ldnl 0\n        adc -1\n        ldc inner\n        stnl 0            ; inner--\n        br innerloop\n\nnextouter:\n        ldc outer\n        ldnl 0\n        adc -1\n        ldc outer\n        stnl 0            ; outer--\n        br outerloop\n\ndone:   HALT\n\nn:      data 8\nouter:  data 0\ninner:  data 0\np:      data 0\nta:     data 0\ntb:     data 0\narr:    data 5\n        data -3\n        data 12\n        data 0\n        data 7\n        data -9\n        data 4\n        data 1\n"}, {"key": "test10", "title": "test10  \u2014  sum of n numbers {3,1,4,1,5,9,2,6}.", "code": "; test10.asm - sum of n numbers {3,1,4,1,5,9,2,6}.\n; Expected: HALT with A = 31 and 'sum' = 31.\n        ldc 0\n        ldc sum\n        stnl 0           ; sum = 0\n        ldc arr\n        ldc p\n        stnl 0           ; p = &arr[0]\n        ldc n\n        ldnl 0\n        ldc cnt\n        stnl 0           ; cnt = n\nloop:   ldc cnt\n        ldnl 0\n        brz done\n        ldc p\n        ldnl 0\n        ldnl 0           ; A = *p\n        ldc sum\n        ldnl 0\n        add              ; A = *p + sum\n        ldc sum\n        stnl 0           ; sum = A\n        ldc p\n        ldnl 0\n        adc 1\n        ldc p\n        stnl 0           ; p++\n        ldc cnt\n        ldnl 0\n        adc -1\n        ldc cnt\n        stnl 0           ; cnt--\n        br loop\ndone:   ldc sum\n        ldnl 0\n        HALT\nn:      data 8\nsum:    data 0\np:      data 0\ncnt:    data 0\narr:    data 3\n        data 1\n        data 4\n        data 1\n        data 5\n        data 9\n        data 2\n        data 6\n"}, {"key": "test11", "title": "test11  \u2014  polynomial p(x) = 3x^2 + 2x + 5 at x = 4 using Horner's rule and mul.", "code": "; test11.asm - polynomial p(x) = 3x^2 + 2x + 5 at x = 4 using Horner's rule and mul.\n; Expected: HALT with A = 61 (also stored in 'result').\n        ldc 3\n        ldc x\n        ldnl 0\n        mul              ; 3x\n        adc 2            ; 3x + 2\n        ldc x\n        ldnl 0\n        mul              ; (3x+2)x\n        adc 5            ; 3x^2 + 2x + 5\n        ldc result\n        stnl 0\n        ldc result\n        ldnl 0\n        HALT\nx:      data 4\nresult: data 0\n"}, {"key": "test12", "title": "test12  \u2014  arithmetic mean of {10,20,30,40,51} using a loop and div.", "code": "; test12.asm - arithmetic mean of {10,20,30,40,51} using a loop and div.\n; Expected: HALT with A = 30 (151 / 5, truncating); 'sum' = 151.\n        ldc 0\n        ldc sum\n        stnl 0\n        ldc arr\n        ldc p\n        stnl 0\n        ldc n\n        ldnl 0\n        ldc cnt\n        stnl 0\nloop:   ldc cnt\n        ldnl 0\n        brz done\n        ldc p\n        ldnl 0\n        ldnl 0\n        ldc sum\n        ldnl 0\n        add\n        ldc sum\n        stnl 0\n        ldc p\n        ldnl 0\n        adc 1\n        ldc p\n        stnl 0\n        ldc cnt\n        ldnl 0\n        adc -1\n        ldc cnt\n        stnl 0\n        br loop\ndone:   ldc sum\n        ldnl 0           ; A = sum\n        ldc n\n        ldnl 0           ; B = sum, A = n\n        div              ; A = sum / n\n        HALT\nn:      data 5\nsum:    data 0\np:      data 0\ncnt:    data 0\narr:    data 10\n        data 20\n        data 30\n        data 40\n        data 51\n"}, {"key": "test13", "title": "test13  \u2014  procedure call/return: square(3) + square(4).", "code": "; test13.asm - procedure call/return: square(3) + square(4).\n; Expected: HALT with A = 25.\n; Convention: argument in A before 'call'; on entry A = return address, B = argument.\n        ldc 3\n        call square      ; A = 9\n        ldc t\n        stnl 0           ; t = 9\n        ldc 4\n        call square      ; A = 16\n        ldc t\n        ldnl 0           ; B = 16, A = 9\n        add              ; A = 25\n        HALT\nsquare: adj -1\n        stl 0            ; save return address; A = arg (B still arg)\n        mul              ; A = arg * arg\n        ldl 0            ; B = square, A = return address\n        adj 1\n        return           ; PC = A; A = B = square\nt:      data 0\n"}, {"key": "test14", "title": "test14  \u2014  division by zero.", "code": "; test14.asm - division by zero.\n; Expected: emulator stops with \"RUNTIME ERROR: division by zero\".\n        ldc 5\n        ldc 0\n        div\n        HALT\n"}, {"key": "test15", "title": "test15  \u2014  errant program: store outside memory.", "code": "; test15.asm - errant program: store outside memory.\n; Expected: emulator stops with \"stnl address out of range\".\n        ldc 1\n        ldc 1\n        stnl 1000000\n        HALT\n"}, {"key": "test16", "title": "test16  \u2014  errant program: infinite loop.", "code": "; test16.asm - errant program: infinite loop.\n; Expected: emulator stops with \"instruction limit exceeded\".\nspin:   br spin\n"}, {"key": "test17", "title": "test17  \u2014  shifts, sub and local (stack) addressing.", "code": "; test17.asm - shifts, sub and local (stack) addressing.\n; Expected: HALT with A = 106 (99 + 7 through stl/ldl).\n; Sub-checks (see comments): 1<<4 = 16, 16>>2 = 4, 4-10 = -6 (stored to 'res').\n        ldc 1\n        ldc 4\n        shl              ; 16\n        ldc 2\n        shr              ; 4\n        ldc 10\n        sub              ; 4 - 10 = -6\n        ldc res\n        stnl 0           ; res = -6\n        adj -2\n        ldc 99\n        stl 0\n        ldc 7\n        stl 1\n        ldl 0\n        ldl 1\n        add              ; 106\n        adj 2\n        HALT\nres:    data 0\n"}, {"key": "test18", "title": "test18  \u2014  more error cases.", "code": "; test18.asm - more error cases.\n; Expected: errors for each of the lines below; no object file.\nx: SET           ; SET without a value\nSET 5            ; SET without a label\nldc 0x1000000000 ; out of range\nldc missingone  ; undefined label\ndata             ; data without operand\nbr anotherone   ; undefined label\na-b: ldc 1       ; invalid label name\n"}];</script>
+<script>/*
+ * app.js - user interface logic for IITPSx
+ * Author: Parth Tomar (2501CS09), IIT Patna - CS2102 mini project
+ * Uses core.js (window.IITPSx) for assembling and emulating.
+ * EXAMPLES is injected by build_gui.py from Tests/test*.asm.
+ *
+ * Features: editor with breakpoints, assemble / run / step / step back, registers, listing with hit counts,
+ * raw .lst view, .o viewer (hex dump + bit fields), memory view with watches, statistics,
+ * console, and a built-in terminal that mimics the command line tools (asm, emu, cat, xxd ...).
+ */
+(function () {
+  'use strict';
+
+  var $ = function (id) { return document.getElementById(id); };
+  var code = $('code'), gutter = $('gutter');
+  var CODE_KEY = 'iitpsx-code', THEME_KEY = 'iitpsx-theme', FONT_KEY = 'iitpsx-font';
+  var MEM_ROWS = 64;
+  var examples = (typeof EXAMPLES === 'undefined') ? [] : EXAMPLES;
+
+  /* everything the UI needs to remember */
+  var S = {
+    result: null, machine: null, dirty: true, running: false, timer: null,
+    fileName: 'program', lstText: '', objBytes: null,
+    errLines: {}, warnLines: {}, curLine: 0, runErrLine: 0,
+    breaks: {}, breakAddrs: {},                /* breakpoint source lines / matching addresses */
+    prev: { A: 0, B: 0, PC: 0, SP: 0 },
+    memStart: 0, traceCount: 0, fontSize: 13,
+    rowByAddr: {}, hitCell: {}, pcRow: null, watches: []
+  };
+
+  /* ---------- tiny helpers ---------- */
+  function store(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } }
+  function load(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function hex(n, w) { var s = (n >>> 0).toString(16).toUpperCase(); while (s.length < w) s = '0' + s; return s; }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined) e.textContent = text;
+    return e;
+  }
+  function pad(s, n) { s = String(s); while (s.length < n) s += ' '; return s; }
+  function regsLine(m) {
+    return 'Registers: A=' + m.A + ' (0x' + hex(m.A, 8) + ')  B=' + m.B + ' (0x' + hex(m.B, 8) + ')  PC=' + m.PC + '  SP=' + m.SP;
+  }
+  function copyText(text, what) {
+    function done() { log('info', what + ' copied to clipboard.'); setStatusMsg('Copied ' + what); }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+    function fallback() {
+      var ta = el('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); done(); } catch (e) { log('warn', 'Copy failed.'); }
+      document.body.removeChild(ta);
+    }
+  }
+
+  /* ---------- console (messages) ---------- */
+  function log(kind, text, line) {
+    var box = $('console');
+    var d = el('div', kind + (line ? ' line' : ''), text);
+    if (line) d.setAttribute('data-line', line);
+    box.appendChild(d);
+    while (box.childNodes.length > 1500) box.removeChild(box.firstChild);
+    var pane = $('pane-console');
+    pane.scrollTop = pane.scrollHeight;
+  }
+  function clearConsole() { $('console').innerHTML = ''; }
+
+  /* ---------- terminal output ---------- */
+  function tprint(text, cls) {
+    var out = $('termOut');
+    out.appendChild(el('div', cls || '', text));
+    while (out.childNodes.length > 4000) out.removeChild(out.firstChild);
+    out.scrollTop = out.scrollHeight;
+  }
+  function showDock(show) {
+    $('dock').classList.toggle('hidden', !show);
+    if (show) $('termIn').focus();
+  }
+  function fn() { return S.fileName; }
+
+  /* ---------- status bar ---------- */
+  function setStatus(kind, badge, msg) {
+    var b = $('state');
+    b.className = 'badge ' + kind;
+    b.textContent = badge;
+    if (msg !== undefined) $('statusMsg').textContent = msg;
+  }
+  function setStatusMsg(msg) { $('statusMsg').textContent = msg; }
+
+  /* ---------- tabs ---------- */
+  function switchTab(name) {
+    var btns = document.querySelectorAll('.tabbar button');
+    for (var i = 0; i < btns.length; i++) btns[i].classList.toggle('active', btns[i].getAttribute('data-tab') === name);
+    var panes = document.querySelectorAll('.pane');
+    for (var j = 0; j < panes.length; j++) panes[j].classList.toggle('active', panes[j].id === 'pane-' + name);
+    if (name === 'memory') renderMemory();
+    if (name === 'stats') renderStats();
+  }
+  function activeTab() {
+    var b = document.querySelector('.tabbar button.active');
+    return b ? b.getAttribute('data-tab') : '';
+  }
+
+  /* ---------- editor gutter (line numbers, errors, breakpoints) ---------- */
+  function renderGutter() {
+    var n = code.value.split('\n').length;
+    var html = '';
+    for (var i = 1; i <= n; i++) {
+      var cls = '';
+      if (S.errLines[i] || S.runErrLine === i) cls = 'err';
+      else if (S.curLine === i) cls = 'cur';
+      else if (S.warnLines[i]) cls = 'warn';
+      if (S.breaks[i]) cls += ' bp';
+      html += '<div' + (cls ? ' class="' + cls.trim() + '"' : '') + '>' + i + '</div>';
+    }
+    gutter.innerHTML = html;
+    gutter.scrollTop = code.scrollTop;
+  }
+
+  function goToLine(n) {
+    var lines = code.value.split('\n'), pos = 0;
+    for (var i = 0; i < n - 1 && i < lines.length; i++) pos += lines[i].length + 1;
+    var end = pos + (lines[n - 1] ? lines[n - 1].length : 0);
+    code.focus();
+    code.setSelectionRange(pos, end);
+    code.scrollTop = Math.max(0, (n - 4) * (S.fontSize + 7));
+    gutter.scrollTop = code.scrollTop;
+  }
+
+  function updateCursorInfo() {
+    var before = code.value.slice(0, code.selectionStart).split('\n');
+    $('cursorPos').textContent = 'Ln ' + before.length + ', Col ' + (before[before.length - 1].length + 1);
+  }
+
+  function setFont(size) {
+    S.fontSize = Math.max(10, Math.min(24, size));
+    document.documentElement.style.setProperty('--fs', S.fontSize + 'px');
+    document.documentElement.style.setProperty('--lh', (S.fontSize + 7) + 'px');
+    store(FONT_KEY, String(S.fontSize));
+    gutter.scrollTop = code.scrollTop;
+  }
+
+  /* ---------- breakpoints ---------- */
+  function computeBreakAddrs() {
+    S.breakAddrs = {};
+    if (!S.result || !S.result.ok) return;
+    S.result.listing.forEach(function (e) { if (e.type === 1 && S.breaks[e.line]) S.breakAddrs[e.addr] = true; });
+  }
+  function toggleBreak(line) {
+    if (S.breaks[line]) delete S.breaks[line]; else S.breaks[line] = true;
+    computeBreakAddrs(); renderGutter();
+  }
+
+  /* ---------- registers ---------- */
+  function showReg(id, value) {
+    var card = $(id);
+    card.querySelector('.dec').textContent = value;
+    card.querySelector('.hex').textContent = '0x' + hex(value, 8);
+  }
+  function updateRegs() {
+    var m = S.machine;
+    var cur = m ? { A: m.A, B: m.B, PC: m.PC, SP: m.SP } : { A: 0, B: 0, PC: 0, SP: 0 };
+    ['A', 'B', 'PC', 'SP'].forEach(function (r) {
+      showReg('reg' + r, cur[r]);
+      if (cur[r] !== S.prev[r]) {
+        var card = $('reg' + r);
+        card.classList.add('changed');
+        setTimeout(function () { card.classList.remove('changed'); }, 500);
+      }
+    });
+    S.prev = cur;
+  }
+
+  /* ---------- listing tab ---------- */
+  function buildListing() {
+    var body = $('listBody');
+    body.innerHTML = '';
+    S.rowByAddr = {}; S.hitCell = {}; S.pcRow = null;
+    var r = S.result;
+    if (!r || !r.ok) return;
+    r.listing.forEach(function (e) {
+      var tr = el('tr', 'click');
+      tr.setAttribute('data-line', e.line);
+      if (e.type === 0) {
+        tr.className = 'label click';
+        tr.appendChild(el('td', '', hex(e.addr, 8))); tr.appendChild(el('td', '', ''));
+        tr.appendChild(el('td', '', e.text)); tr.appendChild(el('td', '', ''));
+      } else if (e.type === 1) {
+        var hc = el('td', '', '');
+        tr.appendChild(el('td', '', hex(e.addr, 8))); tr.appendChild(el('td', '', hex(e.word, 8)));
+        tr.appendChild(el('td', '', e.text)); tr.appendChild(hc);
+        S.rowByAddr[e.addr] = tr; S.hitCell[e.addr] = hc;
+      } else {
+        tr.className = 'set click';
+        tr.appendChild(el('td', '', '')); tr.appendChild(el('td', '', ''));
+        tr.appendChild(el('td', '', e.text)); tr.appendChild(el('td', '', ''));
+      }
+      body.appendChild(tr);
+    });
+
+    var sym = $('symbols');
+    sym.innerHTML = '';
+    sym.appendChild(el('b', '', 'Symbols'));
+    if (r.labels.length === 0) sym.appendChild(el('span', 'chip', 'none'));
+    r.labels.forEach(function (l) {
+      sym.appendChild(el('span', 'chip', l.name + (l.isSet ? ' = ' + l.value + ' (SET)' : ' @ ' + hex(l.value, 4))));
+    });
+    $('dlButtons').style.display = 'block';
+    renderValues();
+  }
+
+  /* Live contents of every data label, read from memory. A label owns the data
+   * words from its address up to the next label, so editing "data 12" to
+   * "data 123" shows up here after Run. Not a fixed expected result. */
+  function dataGroups() {
+    var r = S.result;
+    if (!r || !r.ok) return [];
+    var isData = {};
+    r.listing.forEach(function (e) {
+      if (e.type === 1 && /^data\b/.test(e.text)) isData[e.addr] = true;
+    });
+    var named = {};
+    r.labels.forEach(function (l) { if (!l.isSet) named[l.value] = true; });
+    var mem = S.machine ? S.machine.mem : null;
+    function wordAt(a) { return mem ? mem[a] : (r.words[a] | 0); }
+    var groups = [];
+    r.labels.forEach(function (l) {
+      if (l.isSet || !isData[l.value]) return;
+      var vals = [];
+      for (var a = l.value; isData[a] && (a === l.value || !named[a]); a++) vals.push(wordAt(a));
+      groups.push({ name: l.name, addr: l.value, vals: vals });
+    });
+    groups.sort(function (a, b) { return a.addr - b.addr; });
+    return groups;
+  }
+
+  function renderValues() {
+    var box = $('values');
+    if (!box) return;
+    var groups = dataGroups();
+    box.innerHTML = '';
+    if (!groups.length) { box.style.display = 'none'; return; }
+    box.style.display = 'block';
+    box.appendChild(el('b', '', 'Data'));
+    groups.forEach(function (g) {
+      box.appendChild(el('span', 'chip', g.name + ' = ' + g.vals.join(' ')));
+    });
+  }
+
+  /* Listing machine-code column tracks memory, so a sorted array is not stuck
+   * on the words from when the program was assembled. */
+  function syncListingMemory() {
+    var m = S.machine, r = S.result;
+    if (!m || !r) return;
+    r.listing.forEach(function (e) {
+      if (e.type !== 1 || !S.rowByAddr[e.addr]) return;
+      var tr = S.rowByAddr[e.addr];
+      var w = m.mem[e.addr];
+      tr.cells[1].textContent = hex(w, 8);
+      if (/^data\b/.test(e.text)) tr.cells[2].textContent = 'data ' + w;
+    });
+  }
+
+  function clearListing() {
+    $('listBody').innerHTML = '';
+    $('symbols').innerHTML = '';
+    $('dlButtons').style.display = 'none';
+    if ($('values')) { $('values').innerHTML = ''; $('values').style.display = 'none'; }
+    S.rowByAddr = {}; S.hitCell = {}; S.pcRow = null; S.lstText = ''; S.objBytes = null;
+    $('lstText').textContent = 'Assemble a program to see the listing file here.';
+    $('lstInfo').textContent = 'not assembled';
+    $('objHex').textContent = 'Assemble a program to see the object file here.';
+    $('objWords').innerHTML = '';
+    $('objInfo').textContent = 'not assembled';
+  }
+
+  function highlightPC() {
+    if (S.pcRow) S.pcRow.classList.remove('pc');
+    S.pcRow = null; S.curLine = 0;
+    var m = S.machine;
+    if (m && m.state !== 'halt' && S.rowByAddr[m.PC]) {
+      S.pcRow = S.rowByAddr[m.PC];
+      S.pcRow.classList.add('pc');
+      S.curLine = +S.pcRow.getAttribute('data-line');
+      if (activeTab() === 'listing') S.pcRow.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function updateHits() {
+    var m = S.machine;
+    if (!m) return;
+    for (var a in S.hitCell) S.hitCell[a].textContent = m.hits[a] > 0 ? m.hits[a] : '';
+  }
+
+  /* ---------- .lst and .o tabs ---------- */
+  function hexdumpLines(bytes) {
+    var lines = [];
+    for (var off = 0; off < bytes.length; off += 16) {
+      var hexs = '', asc = '';
+      for (var i = 0; i < 16; i++) {
+        if (off + i < bytes.length) {
+          var b = bytes[off + i];
+          hexs += hex(b, 2); asc += (b >= 32 && b < 127) ? String.fromCharCode(b) : '.';
+        } else hexs += '  ';
+        if (i % 2 === 1) hexs += ' ';
+      }
+      lines.push(hex(off, 8) + ': ' + hexs + ' ' + asc);
+    }
+    return lines;
+  }
+
+  function bitsHtml(word) {
+    var s = (word >>> 0).toString(2);
+    while (s.length < 32) s = '0' + s;
+    return '<span class="op">' + s.slice(0, 8) + ' ' + s.slice(8, 16) + ' ' + s.slice(16, 24) +
+      '</span> <span class="opc">' + s.slice(24) + '</span>';
+  }
+
+  function buildFileTabs() {
+    var r = S.result;
+    S.lstText = IITPSx.listingText(r.listing);
+    S.objBytes = IITPSx.objectBytes(r.words);
+    $('lstText').textContent = S.lstText;
+    $('lstInfo').textContent = fn() + '.lst  -  ' + r.listing.length + ' lines, ' + S.lstText.length + ' bytes';
+    $('objInfo').textContent = fn() + '.o  -  ' + S.objBytes.length + ' bytes = ' + r.words.length + ' words (little-endian)';
+    $('objHex').textContent = hexdumpLines(S.objBytes).join('\n') + '\n';
+
+    var textAt = {};
+    r.listing.forEach(function (e) { if (e.type === 1) textAt[e.addr] = e.text; });
+    var h = '<table><thead><tr><th>Addr</th><th>Word</th><th>Binary (<span class="bits"><span class="op">operand 24</span> | <span class="opc">opcode 8</span></span>)</th>' +
+      '<th>Op</th><th>Operand</th><th>Source</th></tr></thead><tbody>';
+    r.words.forEach(function (w, a) {
+      var op = w & 0xFF, arg = (w & 0xFFFFFF00) >> 8, txt = textAt[a] || '';
+      var isData = /^data/.test(txt);
+      h += '<tr><td>' + hex(a, 8) + '</td><td>' + hex(w, 8) + '</td><td class="bits">' + bitsHtml(w) + '</td><td>' +
+        (isData ? '-' : op) + '</td><td>' + (isData ? '-' : arg) + '</td><td></td></tr>';
+    });
+    h += '</tbody></table>';
+    $('objWords').innerHTML = h;
+    var rows = $('objWords').querySelectorAll('tbody tr');
+    for (var i = 0; i < rows.length; i++) rows[i].cells[5].textContent = textAt[i] || '';
+  }
+
+  /* ---------- memory tab ---------- */
+  function clampStart(a) {
+    var size = S.machine ? S.machine.memSize : IITPSx.MEM_WORDS;
+    return Math.max(0, Math.min(a, size - MEM_ROWS));
+  }
+  function renderMemory() {
+    var body = $('memBody');
+    body.innerHTML = '';
+    renderWatches();
+    var m = S.machine;
+    if (!m) {
+      var tr0 = el('tr'); var td0 = el('td', '', 'Assemble a program first.'); td0.colSpan = 4;
+      tr0.appendChild(td0); body.appendChild(tr0);
+      return;
+    }
+    S.memStart = clampStart(S.memStart);
+    $('memStart').value = S.memStart.toString(16).toUpperCase();
+    var textAt = {};
+    S.result.listing.forEach(function (e) { if (e.type === 1) textAt[e.addr] = e.text; });
+    for (var a = S.memStart; a < S.memStart + MEM_ROWS; a++) {
+      var w = m.mem[a];
+      var cls = '';
+      if (a === m.PC && m.state !== 'halt') cls += ' pc';
+      if (a === m.lastWrite) cls += ' wr';
+      if (a === m.SP) cls += ' sp';
+      var tr = el('tr', cls.trim());
+      tr.appendChild(el('td', '', hex(a, 8)));
+      tr.appendChild(el('td', '', hex(w, 8)));
+      tr.appendChild(el('td', '', String(w)));
+      var shown = '';
+      if (a < S.result.words.length) shown = /^data\b/.test(textAt[a] || '') ? ('data ' + w) : IITPSx.disassemble(w);
+      tr.appendChild(el('td', '', shown));
+      body.appendChild(tr);
+    }
+  }
+
+  /* watches: a label name or a hex address; shown live as chips */
+  function resolveWatch(text) {
+    var t = text.trim();
+    if (!t) return null;
+    if (S.result && S.result.ok) {
+      for (var i = 0; i < S.result.labels.length; i++)
+        if (S.result.labels[i].name === t && !S.result.labels[i].isSet) return { text: t, addr: S.result.labels[i].value };
+    }
+    var v = parseInt(t.replace(/^0x/i, ''), 16);
+    if (!isNaN(v) && /^(0x)?[0-9a-fA-F]+$/.test(t)) return { text: t, addr: v };
+    return null;
+  }
+  function addWatch(text) {
+    var w = resolveWatch(text);
+    if (!w) { setStatusMsg('Watch: unknown label or bad hex address'); return false; }
+    S.watches.push(w); renderWatches(); return true;
+  }
+  function renderWatches() {
+    var bar = $('watchBar');
+    bar.innerHTML = '';
+    bar.style.display = S.watches.length ? 'block' : 'none';
+    S.watches.forEach(function (w, i) {
+      var val = S.machine && w.addr >= 0 && w.addr < S.machine.memSize ? S.machine.mem[w.addr] : '?';
+      var chip = el('span', 'chip w', w.text + ' @' + hex(w.addr, 4) + ' = ' + val);
+      chip.title = 'click to remove';
+      chip.onclick = function () { S.watches.splice(i, 1); renderWatches(); };
+      bar.appendChild(chip);
+    });
+  }
+
+  /* ---------- statistics tab ---------- */
+  function renderStats() {
+    var pane = $('pane-stats'), m = S.machine;
+    if (!m) { pane.textContent = 'Assemble and run a program to see statistics.'; return; }
+    var total = m.steps, words = S.result.words.length;
+    var h = '<div class="kv">' +
+      '<div><b>' + total + '</b><span>instructions executed</span></div>' +
+      '<div><b>' + words + '</b><span>words in program</span></div>' +
+      '<div><b>' + (m.memSize - m.minSP) + '</b><span>max stack depth (words)</span></div>' +
+      '<div><b>' + m.history.length + '</b><span>steps you can undo</span></div></div>';
+    h += '<h3 class="sec">Instruction mix</h3><table><tbody>';
+    var max = 1, i;
+    for (i = 0; i < m.counts.length; i++) if (m.counts[i] > max) max = m.counts[i];
+    var order = [];
+    for (i = 0; i < m.counts.length; i++) if (m.counts[i] > 0) order.push(i);
+    order.sort(function (a, b) { return m.counts[b] - m.counts[a]; });
+    if (!order.length) h += '<tr><td>nothing executed yet</td></tr>';
+    order.forEach(function (op) {
+      var pct = total ? (100 * m.counts[op] / total).toFixed(1) : '0';
+      h += '<tr><td>' + IITPSx.NAMES[op] + '</td><td><span class="bar" style="width:' + Math.max(2, Math.round(220 * m.counts[op] / max)) +
+        'px"></span></td><td>' + m.counts[op] + '</td><td>' + pct + '%</td></tr>';
+    });
+    h += '</tbody></table><h3 class="sec">Hot spots (most executed addresses)</h3><table><tbody>';
+    var addrs = [];
+    for (var a in S.rowByAddr) if (m.hits[a] > 0) addrs.push(+a);
+    addrs.sort(function (x, y) { return m.hits[y] - m.hits[x]; });
+    addrs.slice(0, 8).forEach(function (a) {
+      var cells = S.rowByAddr[a].cells;
+      h += '<tr><td>' + hex(a, 8) + '</td><td>' + cells[2].textContent + '</td><td>' + m.hits[a] + ' times</td></tr>';
+    });
+    if (!addrs.length) h += '<tr><td>nothing executed yet</td></tr>';
+    pane.innerHTML = h + '</tbody></table>';
+  }
+
+  /* ---------- refresh everything after the machine changed ---------- */
+  function refreshAll() {
+    updateRegs();
+    highlightPC();
+    renderGutter();
+    updateHits();
+    syncListingMemory();
+    renderValues();
+    var t = activeTab();
+    if (t === 'memory') renderMemory();
+    if (t === 'stats') renderStats();
+    $('stepCount').textContent = (S.machine ? S.machine.steps : 0) + ' steps';
+    $('btnBack').disabled = !(S.machine && S.machine.history.length > 0);
+  }
+
+  /* ---------- assemble ---------- */
+  function doAssemble(noEcho) {
+    stopRun();
+    clearConsole();
+    if (!noEcho) tprint('$ asm ' + fn() + '.asm', 'cmd');
+    var r = IITPSx.assemble(code.value);
+    S.result = r; S.dirty = false; S.machine = null;
+    S.errLines = {}; S.warnLines = {}; S.runErrLine = 0;
+    r.errors.forEach(function (e) {
+      S.errLines[e.line] = 1;
+      log('err', 'ERROR line ' + e.line + ': ' + e.msg, e.line);
+      tprint('ERROR: ' + fn() + '.asm:' + e.line + ': ' + e.msg, 'err');
+    });
+    r.warnings.forEach(function (w) {
+      if (w.line) S.warnLines[w.line] = 1;
+      log('warn', 'WARNING' + (w.line ? ' line ' + w.line : '') + ': ' + w.msg, w.line);
+      tprint('WARNING: ' + fn() + '.asm' + (w.line ? ':' + w.line : '') + ': ' + w.msg, 'warn');
+    });
+    if (!r.ok) {
+      clearListing(); computeBreakAddrs();
+      var msg = 'Assembly FAILED: ' + r.errors.length + ' error(s), ' + r.warnings.length + ' warning(s). No output files written.';
+      log('err', msg); tprint(msg, 'err');
+      setStatus('error', 'ASM ERRORS', r.errors.length + ' error(s) - click a message to jump to the line');
+      showDock(true);
+      updateRegs(); renderGutter(); $('stepCount').textContent = '0 steps'; $('btnBack').disabled = true;
+      return false;
+    }
+    var okMsg = 'Assembly OK: ' + r.words.length + ' word(s), ' + r.warnings.length + ' warning(s). Wrote ' + fn() + '.o and ' + fn() + '.lst';
+    log('ok', okMsg); tprint(okMsg, 'ok');
+    S.machine = new IITPSx.Machine(r.words);
+    buildListing(); buildFileTabs(); computeBreakAddrs();
+    if ($('autoLst').checked) { tprint('$ cat ' + fn() + '.lst', 'cmd'); tprint(S.lstText.replace(/\n$/, '')); }
+    setStatus('ready', 'READY', 'Assembled ' + r.words.length + ' word(s). Press Run or Step.');
+    if (activeTab() === 'console' || activeTab() === 'help') switchTab('listing');
+    refreshAll();
+    return true;
+  }
+
+  /* ---------- execution ---------- */
+  function execOne(m, showLine) {
+    var pc = m.PC;
+    var text = (pc >= 0 && pc < m.memSize) ? IITPSx.disassemble(m.mem[pc]) : '?';
+    var res = m.step();
+    if (showLine && S.traceCount < 2000) {
+      S.traceCount++;
+      tprint(hex(pc, 8) + ': ' + pad(text, 14) + '[A=' + m.A + ' B=' + m.B + ' SP=' + m.SP + ']', 'info');
+      if (S.traceCount === 2000) tprint('... trace stopped after 2000 lines', 'info');
+    }
+    return res;
+  }
+
+  function finish(m, res) {
+    stopRun();
+    if (res === 'halt') {
+      log('ok', 'HALT reached after ' + m.steps + ' instruction(s).  A=' + m.A + ' B=' + m.B + ' PC=' + m.PC + ' SP=' + m.SP);
+      tprint('HALT reached after ' + m.steps + ' instruction(s)', 'ok'); tprint(regsLine(m), 'hl');
+      var groups = dataGroups(), summary = '';
+      groups.forEach(function (g) {
+        var line = g.name + ' = ' + g.vals.join(' ');
+        log('ok', line); tprint(line, 'hl');
+        if (!summary || g.vals.length > summary.len) summary = { line: line, len: g.vals.length };
+      });
+      setStatus('halt', 'HALTED',
+        'A = ' + m.A + (summary ? '  |  ' + summary.line : ' (0x' + hex(m.A, 8) + ')'));
+    } else {
+      log('err', 'RUNTIME ERROR: ' + m.message + '  (after ' + m.steps + ' instructions, PC=' + m.PC + ')');
+      tprint('RUNTIME ERROR: ' + m.message, 'err');
+      tprint('Instructions executed: ' + m.steps, 'err'); tprint(regsLine(m), 'hl');
+      var row = S.rowByAddr[m.PC - 1];
+      S.runErrLine = row ? +row.getAttribute('data-line') : 0;
+      if (S.runErrLine) {
+        log('err', 'Faulting instruction is on source line ' + S.runErrLine, S.runErrLine);
+        tprint('Faulting instruction is on source line ' + S.runErrLine, 'err');
+      }
+      setStatus('error', 'RUNTIME ERROR', m.message);
+      showDock(true);
+    }
+    refreshAll();
+  }
+
+  function ensureReady() {
+    if (S.dirty || !S.machine) { if (!doAssemble()) return null; }
+    var m = S.machine;
+    if (m.state === 'halt' || m.state === 'error') {
+      m.reset(); S.runErrLine = 0; S.prev = { A: 0, B: 0, PC: 0, SP: 0 };
+    }
+    return m;
+  }
+
+  function doStep(count, noEcho) {
+    if (S.running) return;
+    var m = ensureReady();
+    if (!m) return;
+    m.recordHistory = true;
+    var n = count || 1, res = 'ok';
+    if (n > 1 && !noEcho) tprint('$ step ' + n, 'cmd');
+    for (var i = 0; i < n && res === 'ok'; i++) res = execOne(m, $('trace').checked || n > 1 || noEcho === true);
+    if (res === 'ok') { setStatus('running', 'STEPPING', 'Executed ' + n + ' instruction(s)'); refreshAll(); }
+    else finish(m, res);
+  }
+
+  function doBack(noEcho) {
+    if (S.running || !S.machine) return;
+    if (!S.machine.stepBack()) { setStatusMsg('Nothing to undo (history is only kept while stepping or running slowly)'); if (noEcho) tprint('nothing to undo', 'warn'); return; }
+    S.runErrLine = 0;
+    setStatus('ready', 'STEPPED BACK', 'Undid one instruction');
+    if (noEcho) tprint('PC=' + S.machine.PC + '  ' + regsLine(S.machine), 'hl');
+    refreshAll();
+  }
+
+  function stopRun() {
+    S.running = false;
+    if (S.timer) { clearTimeout(S.timer); S.timer = null; }
+    var b = $('btnRun');
+    b.innerHTML = '&#9654; Run';
+    b.className = 'success';
+  }
+
+  function doRun(noEcho) {
+    if (S.running) {                               /* the button acts as Stop while running */
+      stopRun();
+      setStatus('ready', 'PAUSED', 'Paused. Run or Step to continue.');
+      refreshAll();
+      return;
+    }
+    var m = ensureReady();
+    if (!m) return;
+    if (!noEcho) tprint('$ emu ' + fn() + '.o', 'cmd');
+    S.running = true; S.traceCount = 0;
+    var b = $('btnRun');
+    b.innerHTML = '&#9724; Stop';
+    b.className = 'danger';
+    setStatus('running', 'RUNNING', 'Running... (click a line number to set a breakpoint)');
+    var delay = +$('speed').value;
+    var trace = $('trace').checked;
+    m.recordHistory = delay > 0;                  /* undo history only for slow runs */
+    if (!m.recordHistory) m.history = [];
+
+    function tick() {
+      if (!S.running) return;
+      var n = delay ? 1 : 50000, res = 'ok';
+      while (n-- > 0) {
+        res = execOne(m, trace);
+        if (res !== 'ok') break;
+        if (S.breakAddrs[m.PC]) { res = 'break'; break; }
+      }
+      if (res === 'break') {
+        stopRun();
+        var ln = S.rowByAddr[m.PC] ? S.rowByAddr[m.PC].getAttribute('data-line') : '?';
+        tprint('Breakpoint hit before source line ' + ln + ' (PC=' + m.PC + ')', 'warn');
+        log('warn', 'Breakpoint at line ' + ln);
+        setStatus('ready', 'BREAKPOINT', 'Stopped at line ' + ln + '. Run / Step to continue.');
+        refreshAll();
+        return;
+      }
+      if (res !== 'ok') { finish(m, res); return; }
+      refreshAll();
+      S.timer = setTimeout(tick, delay);
+    }
+    tick();
+  }
+
+  function doReset() {
+    stopRun();
+    if (!S.machine) return;
+    S.machine.reset();
+    S.runErrLine = 0;
+    log('info', 'Machine reset.');
+    setStatus('ready', 'READY', 'Machine reset. Registers cleared, program reloaded.');
+    refreshAll();
+  }
+
+  /* ---------- files ---------- */
+  function download(name, bytes, type) {
+    var url = URL.createObjectURL(new Blob([bytes], { type: type || 'application/octet-stream' }));
+    var a = document.createElement('a');
+    a.href = url; a.download = name;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+  function downloadObj() { if (S.objBytes) download(fn() + '.o', S.objBytes); }
+  function downloadLst() { if (S.lstText) download(fn() + '.lst', S.lstText, 'text/plain'); }
+
+  function loadText(text, name) {
+    stopRun();
+    code.value = text;
+    S.fileName = (name || 'program').replace(/\.[^.]*$/, '') || 'program';
+    S.dirty = true; S.machine = null; S.result = null; S.errLines = {}; S.warnLines = {}; S.runErrLine = 0;
+    S.breaks = {}; S.breakAddrs = {};
+    store(CODE_KEY, text);
+    clearListing(); updateRegs(); renderGutter(); renderMemory();
+    setStatus('ready', 'NOT ASSEMBLED', 'Loaded ' + (name || 'program') + '. Press Assemble.');
+    $('stepCount').textContent = '0 steps'; $('btnBack').disabled = true;
+    $('ps').textContent = S.fileName + ' $';
+  }
+
+  function readFile(file) {
+    var reader = new FileReader();
+    reader.onload = function () { loadText(String(reader.result), file.name); log('info', 'Opened ' + file.name); tprint('Opened ' + file.name, 'info'); };
+    reader.readAsText(file);
+  }
+
+  /* ---------- terminal commands ---------- */
+  var T = { hist: [], pos: 0 };
+  var COMMANDS = ['help', 'clear', 'ls', 'cat', 'xxd', 'hexdump', 'asm', 'emu', 'run', 'step', 'back', 'reset', 'regs',
+    'mem', 'dump', 'disasm', 'labels', 'stats', 'isa', 'break', 'watch', 'goto', 'trace', 'theme', 'version', 'echo'];
+
+  function needAssembled() {
+    if (S.result && S.result.ok && !S.dirty) return true;
+    if (S.dirty || !S.result) { tprint('(source changed - assembling first)', 'info'); return doAssemble(true); }
+    tprint('Nothing assembled: ' + 'fix the errors first.', 'err');
+    return false;
+  }
+
+  function termHelp() {
+    [
+      'asm                 assemble the source (writes name.o and name.lst)',
+      'run | emu           run the program      step [n]   execute n instructions      back   undo one step',
+      'reset               reset the machine    trace      toggle instruction trace',
+      'cat name.lst|.asm   print a file         xxd name.o hex dump of the object file',
+      'ls                  list files           regs       show registers',
+      'mem <hex> [n]       show n words from an address (default 8)',
+      'dump                memory dump like  emu -dump   disasm   disassemble the object file',
+      'labels              symbol table         stats      instruction counts and hot spots',
+      'break <line>        toggle breakpoint    watch <label|hexaddr>   add a watch',
+      'goto <line>         jump in the editor   isa        instruction set    theme   dark/light',
+      'clear               clear the terminal   Up/Down = history, Tab = complete'
+    ].forEach(function (l) { tprint(l, 'info'); });
+  }
+
+  function runCommand(line) {
+    line = line.trim();
+    if (!line) return;
+    tprint(fn() + ' $ ' + line, 'cmd');
+    T.hist.push(line); T.pos = T.hist.length;
+    var parts = line.replace(/^\.\//, '').split(/\s+/);
+    var cmd = parts[0].toLowerCase(), arg = parts.slice(1);
+    var m = S.machine, i;
+
+    switch (cmd) {
+      case 'help': case '?': termHelp(); break;
+      case 'clear': case 'cls': $('termOut').innerHTML = ''; break;
+      case 'echo': tprint(arg.join(' ')); break;
+      case 'version': tprint('IITPSx 1.0.0  (assembler + emulator, Parth Tomar 2501CS09)'); break;
+      case 'theme': $('btnTheme').click(); break;
+      case 'isa':
+        IITPSx.ISA.forEach(function (r) {
+          var op = r.opcode < 0 ? ' -' : pad(r.opcode, 2);
+          var name = r.name === 'halt' ? 'HALT' : r.name;
+          tprint(op + '  ' + pad(name, 8) + r.doc);
+        });
+        break;
+      case 'ls':
+        tprint(fn() + '.asm   ' + code.value.length + ' bytes');
+        if (S.result && S.result.ok) { tprint(fn() + '.o     ' + S.objBytes.length + ' bytes'); tprint(fn() + '.lst   ' + S.lstText.length + ' bytes'); }
+        break;
+      case 'cat':
+        if (!arg[0]) { tprint('usage: cat <name>.asm | <name>.lst', 'err'); break; }
+        if (/\.asm$/.test(arg[0])) tprint(code.value.replace(/\n$/, ''));
+        else if (/\.lst$/.test(arg[0])) { if (needAssembled()) tprint(S.lstText.replace(/\n$/, '')); }
+        else if (/\.o$/.test(arg[0])) tprint('cat: ' + arg[0] + ': binary file - use  xxd ' + arg[0], 'warn');
+        else tprint('cat: ' + arg[0] + ': No such file', 'err');
+        break;
+      case 'xxd': case 'hexdump':
+        if (needAssembled()) hexdumpLines(S.objBytes).forEach(function (l) { tprint(l); });
+        break;
+      case 'asm': doAssemble(true); break;
+      case 'run': case 'emu': doRun(true); break;
+      case 'step': doStep(Math.max(1, Math.min(100000, parseInt(arg[0], 10) || 1)), true); break;
+      case 'back': doBack(true); break;
+      case 'reset': doReset(); tprint('machine reset', 'info'); break;
+      case 'trace': $('trace').checked = !$('trace').checked; tprint('trace ' + ($('trace').checked ? 'on' : 'off'), 'info'); break;
+      case 'regs':
+        if (!m) { tprint('assemble first', 'err'); break; }
+        tprint(regsLine(m), 'hl'); break;
+      case 'mem':
+        if (!needAssembled()) break;
+        m = S.machine;
+        var start = parseInt((arg[0] || '0').replace(/^0x/i, ''), 16), cnt = parseInt(arg[1], 10) || 8;
+        if (isNaN(start) || start < 0 || start >= m.memSize) { tprint('bad address', 'err'); break; }
+        for (i = start; i < Math.min(start + cnt, m.memSize); i += 4) {
+          var row = hex(i, 8) + ':';
+          for (var k = i; k < Math.min(i + 4, start + cnt, m.memSize); k++) row += ' ' + hex(m.mem[k], 8) + '(' + m.mem[k] + ')';
+          tprint(row);
+        }
+        break;
+      case 'dump':
+        if (!needAssembled()) break;
+        m = S.machine;
+        tprint('Memory dump (address: words)');
+        for (i = 0; i < S.result.words.length; i += 4) {
+          var line2 = hex(i, 8) + ':';
+          for (var q = i; q < i + 4 && q < S.result.words.length; q++) line2 += ' ' + hex(m.mem[q], 8);
+          tprint(line2);
+        }
+        var shown = 0;
+        for (i = S.result.words.length; i < m.memSize && shown < 64; i++)
+          if (m.mem[i] !== 0) { if (!shown) tprint('Non-zero words outside the loaded image:'); tprint(hex(i, 8) + ': ' + hex(m.mem[i], 8) + ' (' + m.mem[i] + ')'); shown++; }
+        break;
+      case 'disasm':
+        if (needAssembled()) S.result.words.forEach(function (w, a) { tprint(hex(a, 8) + '  ' + hex(w, 8) + '  ' + IITPSx.disassemble(w)); });
+        break;
+      case 'labels':
+        if (!needAssembled()) break;
+        S.result.labels.forEach(function (l) { tprint(pad(l.name, 16) + ' = ' + l.value + (l.isSet ? '   (SET)' : '   (address 0x' + hex(l.value, 4) + ')')); });
+        break;
+      case 'stats':
+        if (!m) { tprint('assemble first', 'err'); break; }
+        tprint(m.steps + ' instruction(s) executed, max stack depth ' + (m.memSize - m.minSP) + ' word(s)');
+        for (i = 0; i < m.counts.length; i++) if (m.counts[i]) tprint(pad(IITPSx.NAMES[i], 8) + m.counts[i]);
+        break;
+      case 'break':
+        var ln = parseInt(arg[0], 10);
+        if (!ln || ln < 1 || ln > code.value.split('\n').length) { tprint('usage: break <source line number>', 'err'); break; }
+        toggleBreak(ln); tprint('breakpoint ' + (S.breaks[ln] ? 'set on' : 'removed from') + ' line ' + ln, 'info'); break;
+      case 'watch':
+        if (!arg[0]) { tprint('usage: watch <label|hexaddr>', 'err'); break; }
+        if (addWatch(arg[0])) tprint('watching ' + arg[0] + ' (see the Memory tab)', 'info'); else tprint('unknown label / address', 'err');
+        break;
+      case 'goto':
+        var g = parseInt(arg[0], 10);
+        if (g > 0) goToLine(g); else tprint('usage: goto <line>', 'err');
+        break;
+      default:
+        tprint(cmd + ': command not found (type help)', 'err');
+    }
+  }
+
+  /* ---------- help tab ---------- */
+  function buildHelp() {
+    function shown(r) {
+      var name = r.name === 'halt' ? 'HALT' : (r.name === 'set' ? 'SET' : r.name);
+      if (r.kind === 'none') return name;
+      return name + (r.kind === 'offset' ? ' o' : ' v');
+    }
+    var h = '<table class="helptable"><thead><tr><th>Op</th><th>Mnemonic</th><th>Action</th></tr></thead><tbody>';
+    IITPSx.ISA.forEach(function (r) {
+      h += '<tr><td>' + (r.opcode < 0 ? '—' : r.opcode) + '</td><td>' + shown(r) + '</td><td>' + r.doc + '</td></tr>';
+    });
+    h += '</tbody></table>';
+    h += '<p class="helpnote">Registers: A and B form a 2-deep stack, plus PC and SP. Comments start with <b>;</b>. ' +
+      'Numbers can be decimal, 0x hex or 0 octal. Branch operands given as labels become PC-relative offsets.</p>';
+    h += '<p class="helpnote"><b>Tabs:</b> Listing (with execution counts), .lst (the listing file), .o (hex dump and bit fields: ' +
+      'green = 8-bit opcode, blue = 24-bit operand), Memory (with watches), Stats (instruction mix, hot spots).</p>';
+    h += '<p class="helpnote"><b>Shortcuts:</b> <kbd>Ctrl</kbd>+<kbd>Enter</kbd> assemble &nbsp; <kbd>F5</kbd> run/stop &nbsp; ' +
+      '<kbd>F10</kbd> step &nbsp; <kbd>Shift</kbd>+<kbd>F10</kbd> step back &nbsp; <kbd>Ctrl</kbd>+<kbd>`</kbd> terminal.<br>' +
+      'Click a <b>line number</b> to set a breakpoint. Drag an .asm file onto the window to open it. ' +
+      'Click a console message or listing row to jump to the source line. Type <b>help</b> in the terminal for its commands.</p>';
+    $('pane-help').innerHTML = h;
+  }
+
+  /* ---------- wire everything up ---------- */
+  function init() {
+    examples.forEach(function (ex) {
+      var o = el('option', '', ex.title); o.value = ex.key; $('examples').appendChild(o);
+    });
+    var saved = load(CODE_KEY);
+    code.value = saved !== null && saved !== '' ? saved : (examples.length ? examples[0].code : '');
+    if (load(THEME_KEY) === 'light') { document.documentElement.setAttribute('data-theme', 'light'); $('btnTheme').innerHTML = '&#9728;&#65039;'; }
+    var fs = parseInt(load(FONT_KEY), 10); if (fs) setFont(fs);
+
+    $('btnAssemble').onclick = function () { doAssemble(); };
+    $('btnRun').onclick = function () { doRun(); };
+    $('btnStep').onclick = function () { doStep(1); };
+    $('btnBack').onclick = function () { doBack(); };
+    $('btnReset').onclick = doReset;
+    $('btnOpen').onclick = function () { $('fileInput').click(); };
+    $('fileInput').onchange = function () { if (this.files[0]) readFile(this.files[0]); this.value = ''; };
+    $('btnSave').onclick = function () { download(fn() + '.asm', code.value, 'text/plain'); };
+    $('btnDlObj').onclick = downloadObj; $('btnDlLst').onclick = downloadLst;
+    $('lstDl').onclick = downloadLst; $('objDl').onclick = downloadObj;
+    $('lstCopy').onclick = function () { if (S.lstText) copyText(S.lstText, '.lst'); };
+    $('lstTerm').onclick = function () { showDock(true); runCommand('cat ' + fn() + '.lst'); };
+    $('objCopy').onclick = function () { if (S.objBytes) copyText(hexdumpLines(S.objBytes).join('\n'), 'hex dump'); };
+    $('objHexBtn').onclick = function () { $('objHex').style.display = 'block'; $('objWords').style.display = 'none'; this.className = 'segon'; $('objWordBtn').className = ''; };
+    $('objWordBtn').onclick = function () { $('objHex').style.display = 'none'; $('objWords').style.display = 'block'; this.className = 'segon'; $('objHexBtn').className = ''; };
+
+    $('examples').onchange = function () {
+      var key = this.value; this.value = '';
+      examples.forEach(function (ex) { if (ex.key === key) { loadText(ex.code, ex.key + '.asm'); log('info', 'Loaded example: ' + ex.title); tprint('Loaded example: ' + ex.title, 'info'); } });
+    };
+    $('btnTheme').onclick = function () {
+      var light = document.documentElement.getAttribute('data-theme') !== 'light';
+      document.documentElement.setAttribute('data-theme', light ? 'light' : 'dark');
+      this.innerHTML = light ? '&#9728;&#65039;' : '&#127769;';
+      store(THEME_KEY, light ? 'light' : 'dark');
+    };
+    $('btnTerm').onclick = function () { showDock($('dock').classList.contains('hidden')); };
+    $('termHide').onclick = function () { showDock(false); };
+    $('termClear').onclick = function () { $('termOut').innerHTML = ''; };
+    $('termBig').onclick = function () { $('dock').classList.toggle('big'); };
+    $('fontUp').onclick = function () { setFont(S.fontSize + 1); };
+    $('fontDown').onclick = function () { setFont(S.fontSize - 1); };
+
+    var bar = document.querySelectorAll('.tabbar button');
+    for (var i = 0; i < bar.length; i++) bar[i].onclick = function () { switchTab(this.getAttribute('data-tab')); };
+
+    $('memGo').onclick = function () { var v = parseInt($('memStart').value, 16); if (!isNaN(v)) { S.memStart = v; renderMemory(); } };
+    $('memStart').onkeydown = function (e) { if (e.key === 'Enter') $('memGo').onclick(); };
+    $('memPrev').onclick = function () { S.memStart -= MEM_ROWS; renderMemory(); };
+    $('memNext').onclick = function () { S.memStart += MEM_ROWS; renderMemory(); };
+    $('memPC').onclick = function () { if (S.machine) { S.memStart = S.machine.PC - (S.machine.PC % 16); renderMemory(); } };
+    $('memSP').onclick = function () { if (S.machine) { S.memStart = S.machine.SP - 8; renderMemory(); } };
+    $('watchAdd').onclick = function () { if (addWatch($('watchIn').value)) $('watchIn').value = ''; };
+    $('watchIn').onkeydown = function (e) { if (e.key === 'Enter') $('watchAdd').onclick(); };
+
+    $('console').onclick = function (e) { var l = e.target.getAttribute && e.target.getAttribute('data-line'); if (l) goToLine(+l); };
+    $('listBody').onclick = function (e) {
+      var tr = e.target.parentNode; var l = tr && tr.getAttribute && tr.getAttribute('data-line');
+      if (l && +l > 0) goToLine(+l);
+    };
+    gutter.onclick = function (e) {
+      var n = parseInt(e.target.textContent, 10);
+      if (n) toggleBreak(n);
+    };
+
+    code.oninput = function () {
+      S.dirty = true; S.errLines = {}; S.warnLines = {}; S.runErrLine = 0;
+      store(CODE_KEY, code.value);
+      renderGutter(); updateCursorInfo();
+      if (S.machine && !S.running) setStatus('ready', 'MODIFIED', 'Source changed - press Assemble to use the new code.');
+      else if (!S.machine) setStatus('ready', 'NOT ASSEMBLED', 'Press Assemble.');
+    };
+    code.onscroll = function () { gutter.scrollTop = code.scrollTop; };
+    code.onkeyup = code.onclick = updateCursorInfo;
+    code.onkeydown = function (e) {
+      if (e.key === 'Tab') { e.preventDefault(); code.setRangeText('    ', code.selectionStart, code.selectionEnd, 'end'); code.oninput(); }
+    };
+
+    /* terminal input: Enter runs, Up/Down history, Tab completes command names */
+    $('termIn').onkeydown = function (e) {
+      if (e.key === 'Enter') { var v = this.value; this.value = ''; runCommand(v); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); if (T.pos > 0) { T.pos--; this.value = T.hist[T.pos]; } }
+      else if (e.key === 'ArrowDown') { e.preventDefault(); if (T.pos < T.hist.length - 1) { T.pos++; this.value = T.hist[T.pos]; } else { T.pos = T.hist.length; this.value = ''; } }
+      else if (e.key === 'Tab') {
+        e.preventDefault();
+        var word = this.value.trim();
+        if (word && word.indexOf(' ') < 0) {
+          var hits = COMMANDS.filter(function (c) { return c.indexOf(word) === 0; });
+          if (hits.length === 1) this.value = hits[0] + ' '; else if (hits.length > 1) tprint(hits.join('   '), 'info');
+        }
+      }
+      e.stopPropagation();
+    };
+    $('termOut').onclick = function () { if (!window.getSelection().toString()) $('termIn').focus(); };
+
+    document.addEventListener('keydown', function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); doAssemble(); }
+      else if (e.key === 'F5') { e.preventDefault(); doRun(); }
+      else if (e.key === 'F10') { e.preventDefault(); if (e.shiftKey) doBack(); else doStep(1); }
+      else if ((e.ctrlKey || e.metaKey) && e.key === '`') { e.preventDefault(); $('btnTerm').click(); }
+    });
+    window.addEventListener('dragover', function (e) { e.preventDefault(); document.body.classList.add('drop'); });
+    window.addEventListener('dragleave', function () { document.body.classList.remove('drop'); });
+    window.addEventListener('drop', function (e) {
+      e.preventDefault(); document.body.classList.remove('drop');
+      if (e.dataTransfer && e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]);
+    });
+
+    buildHelp();
+    renderGutter(); updateCursorInfo(); updateRegs(); renderMemory(); renderStats();
+    $('btnBack').disabled = true;
+    $('ps').textContent = S.fileName + ' $';
+    log('info', 'Welcome to IITPSx. Pick an example or write your own program, then press Assemble.');
+    tprint('IITPSx terminal - type "help" for commands. Try:  asm   run   cat ' + fn() + '.lst   xxd ' + fn() + '.o', 'info');
+    setStatus('ready', 'NOT ASSEMBLED', 'Write some code and press Assemble.');
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

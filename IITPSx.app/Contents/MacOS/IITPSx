@@ -1,0 +1,11 @@
+#!/bin/bash
+# Launcher for IITPSx: opens the bundled page in an app-style browser window.
+DIR="$(cd "$(dirname "$0")/../Resources" && pwd)"
+FILE="$DIR/IITPSx.html"
+URL="file://$(printf '%s' "$FILE" | sed 's/ /%20/g')"
+for B in "Google Chrome" "Microsoft Edge" "Brave Browser" "Chromium"; do
+  if [ -d "/Applications/$B.app" ] || [ -d "$HOME/Applications/$B.app" ]; then
+    open -na "$B" --args --app="$URL" --window-size=1280,820 && exit 0
+  fi
+done
+open "$FILE"      # Safari / default browser
