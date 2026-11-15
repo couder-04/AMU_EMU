@@ -1,0 +1,18 @@
+Assembler command: ./asm Tests/test07.asm
+ERROR: Tests/test07.asm:6: bogus label name '1badlabel'
+ERROR: Tests/test07.asm:10: missing operand for 'ldc'
+ERROR: Tests/test07.asm:12: unexpected operand for 'add'
+ERROR: Tests/test07.asm:14: unknown mnemonic 'foo'
+ERROR: Tests/test07.asm:16: invalid operand 'missing_label'
+ERROR: Tests/test07.asm:18: unknown mnemonic '//'
+ERROR: Tests/test07.asm:23: duplicate label 'dup'
+ERROR: Tests/test07.asm:28: SET requires a label on the same line
+ERROR: Tests/test07.asm:30: SET needs a numeric value, not a label
+ERROR: Tests/test07.asm:26: no such label 'hello'
+WARNING: Tests/test07.asm:9: label 'start' defined but never used
+WARNING: Tests/test07.asm:20: label 'dup' defined but never used
+WARNING: Tests/test07.asm:30: label 'value' defined but never used
+Assembly FAILED: 10 error(s), 3 warning(s). No output files written.
+Assembler exit status: 1
+
+Emulator not run because assembly failed.

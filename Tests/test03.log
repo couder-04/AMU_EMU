@@ -1,0 +1,10 @@
+Assembler command: ./asm Tests/test03.asm
+Assembly OK: 3 word(s), 0 warning(s). Wrote Tests/test03.o and Tests/test03.lst
+Assembler exit status: 0
+
+Emulator command: ./emu -dump Tests/test03.o
+HALT reached after 3 instruction(s)
+Registers: A=141 (0x0000008D)  B=0 (0x00000000)  PC=3  SP=65536
+Memory dump (address: words)
+00000000: 00004B00 00004201 00000012
+Emulator exit status: 0

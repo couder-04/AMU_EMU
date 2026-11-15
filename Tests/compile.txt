@@ -1,0 +1,6 @@
+make
+./asm bub.asm
+./emu bub.o
+
+./asm Tests/test01.asm
+./emu Tests/test01.o

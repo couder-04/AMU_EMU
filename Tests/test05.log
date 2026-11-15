@@ -1,0 +1,16 @@
+Assembler command: ./asm Tests/test05.asm
+Assembly OK: 19 word(s), 0 warning(s). Wrote Tests/test05.o and Tests/test05.lst
+Assembler exit status: 0
+
+Emulator command: ./emu -dump Tests/test05.o
+HALT reached after 111 instruction(s)
+Registers: A=55 (0x00000037)  B=0 (0x00000000)  PC=19  SP=4094
+Memory dump (address: words)
+00000000: 00100000 0000000B FFFFFE0A 00000A00
+00000004: 00000003 00000000 00000103 00000002
+00000008: 0000080F 00000102 00000002 00000006
+0000000C: 00000103 00000002 FFFFFF01 00000003
+00000010: FFFFF611 00000102 00000012
+Non-zero words outside the loaded image:
+00000FFF: 00000037 (55)
+Emulator exit status: 0

@@ -1,0 +1,6 @@
+00000000: ldc    5    [A=0 B=0 SP=65536]
+00000001: ldc    7    [A=5 B=0 SP=65536]
+00000002: add       [A=7 B=5 SP=65536]
+00000003: halt      [A=12 B=5 SP=65536]
+HALT reached after 4 instruction(s)
+Registers: A=12 (0x0000000C)  B=5 (0x00000005)  PC=4  SP=65536

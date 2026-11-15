@@ -1,0 +1,11 @@
+Assembler command: ./asm Tests/test09.asm
+Assembly OK: 4 word(s), 0 warning(s). Wrote Tests/test09.o and Tests/test09.lst
+Assembler exit status: 0
+
+Emulator command: ./emu -dump Tests/test09.o
+RUNTIME ERROR: division by zero
+Instructions executed: 3
+Registers: A=0 (0x00000000)  B=1 (0x00000001)  PC=3  SP=65536
+Memory dump (address: words)
+00000000: 00000100 00000000 00000014 00000012
+Emulator exit status: 2

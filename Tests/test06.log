@@ -1,0 +1,17 @@
+Assembler command: ./asm Tests/test06.asm
+WARNING: Tests/test06.asm:6: label 'unused1' defined but never used
+WARNING: Tests/test06.asm:7: label 'unused2' defined but never used
+WARNING: Tests/test06.asm:16: label 'afterLoop' defined but never used
+WARNING: Tests/test06.asm:21: label 'neverUsedLabel' defined but never used
+Assembly OK: 9 word(s), 4 warning(s). Wrote Tests/test06.o and Tests/test06.lst
+Assembler exit status: 0
+
+Emulator command: ./emu -limit 30 -dump Tests/test06.o
+RUNTIME ERROR: instruction limit exceeded (probable infinite loop)
+Instructions executed: 30
+Registers: A=15 (0x0000000F)  B=5 (0x00000005)  PC=3  SP=65536
+Memory dump (address: words)
+00000000: 00000500 00000A00 00000006 FFFFFF11
+00000004: 00000100 00000200 00000007 00000300
+00000008: 00000012
+Emulator exit status: 2

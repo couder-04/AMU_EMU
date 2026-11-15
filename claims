@@ -1,0 +1,41 @@
+CS2102 IITPSx Processor Project - Claims
+
+Source files are written in C++:
+- assembler/asm.cpp is the two-pass assembler source.
+- emulator/emu.cpp is the emulator source.
+- make builds both programs with the supplied Makefile.
+
+Assembler:
+- One shared routine processes source in both passes.
+- An instruction table defines mnemonics, opcodes, and operand kinds.
+- Supports labels, numeric operands, PC-relative branches, data, and SET.
+- Reports errors including duplicate/invalid labels, undefined labels,
+  unknown mnemonics, and invalid or missing operands.
+- Produces binary object files and human-readable listings.
+- Includes mul and div opcodes.
+
+Emulator:
+- Loads and executes binary object files.
+- Provides memory dumps, tracing, and disassembly.
+- Implements mul and signed div, including division-by-zero detection.
+- Detects invalid PC and memory access, unknown opcodes, and instruction-limit
+  exhaustion.
+
+Tests in Tests/:
+- test01: valid syntax, labels, branches, data, and an infinite-loop example.
+- test02: malformed input and assembler diagnostics.
+- test03: SET directive and execution.
+- test04: recursive triangle-number program.
+- test05: sum of integers 1 through 10.
+- test06: unused-label warnings and an infinite-loop example.
+- test07: additional malformed-input and SET/DATA diagnostics.
+- test08: n*(n+1)/2 using mul and div.
+- test09: emulator division-by-zero error handling.
+- test10: bubble sort of five values.
+- Successful assemblies include matching .o and .lst files. Each test has a
+  .log recording the assembler result and, when assembled, emulator result.
+- Invalid-input tests have an explanatory .lst file noting that the assembler
+  correctly rejected the source and did not generate a listing.
+
+The included algorithm tests are the triangle-number, summation, arithmetic
+formula, and bubble-sort programs. The logs record their observed outcomes.

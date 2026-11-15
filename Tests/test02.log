@@ -1,0 +1,15 @@
+Assembler command: ./asm Tests/test02.asm
+ERROR: Tests/test02.asm:9: duplicate label 'label'
+ERROR: Tests/test02.asm:11: invalid number '08ge'
+ERROR: Tests/test02.asm:12: missing operand for 'ldc'
+ERROR: Tests/test02.asm:13: unexpected operand for 'add'
+ERROR: Tests/test02.asm:14: extra text at end of line
+ERROR: Tests/test02.asm:15: bogus label name '0def'
+ERROR: Tests/test02.asm:16: unknown mnemonic 'fibble'
+ERROR: Tests/test02.asm:17: unknown mnemonic '0def'
+ERROR: Tests/test02.asm:10: no such label 'nonesuch'
+WARNING: Tests/test02.asm:8: label 'label' defined but never used
+Assembly FAILED: 9 error(s), 1 warning(s). No output files written.
+Assembler exit status: 1
+
+Emulator not run because assembly failed.
